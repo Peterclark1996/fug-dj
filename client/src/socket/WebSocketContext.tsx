@@ -12,7 +12,7 @@ const getSocketUrl = () => {
 const limitedRetries = false
 const maxRetries = 5
 
-const eventListeners: { [key: number]: (event: EventFromServer) => void } = {}
+const eventListeners: { [key: string]: (event: EventFromServer) => void } = {}
 
 const addListenerToSocket = (eventType: EventFromServerType, func: (event: EventFromServer) => void) =>
     (eventListeners[eventType] = func)

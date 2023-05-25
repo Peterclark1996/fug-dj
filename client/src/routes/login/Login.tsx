@@ -12,7 +12,7 @@ const Login = ({ username, setUsername }: LoginProps) => {
 
     const onLoginClick = () => {
         if (username === "") return
-        navigate("/game")
+        navigate("/room/default")
     }
 
     return (
