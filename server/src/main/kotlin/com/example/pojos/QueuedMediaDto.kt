@@ -1,4 +1,4 @@
-package com.example.dtos
+package com.example.pojos
 
 import kotlinx.serialization.Serializable
 

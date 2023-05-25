@@ -8,5 +8,5 @@ class Connection(val session: DefaultWebSocketSession) {
         val lastId = AtomicInteger(0)
     }
     val id = lastId.getAndIncrement()
-    var username = ""
+    var username = "pete"
 }

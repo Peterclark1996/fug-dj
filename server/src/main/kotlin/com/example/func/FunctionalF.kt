@@ -5,7 +5,10 @@ import arrow.core.left
 import arrow.core.right
 
 fun <T> tryCatch(func: () -> T): Either<Error, T> =
-    try { func().right() }
-    catch (e: Throwable) { Error(e).left() }
+    try {
+        func().right()
+    } catch (e: Throwable) {
+        Error(e).left()
+    }
 
-fun <T> T?.toEither() = this?.right() ?: Error("No value").left()
+fun <T> T?.toEither(errorMessage: String = "No value") = this?.right() ?: Error(errorMessage).left()

@@ -2,6 +2,7 @@ package com.example.func
 
 import arrow.core.left
 import arrow.core.right
+import com.example.events.IOutboundEvent
 import com.example.events.InboundEvent
 import io.ktor.websocket.*
 import kotlinx.serialization.KSerializer
@@ -23,7 +24,7 @@ inline fun <reified T> T.encode() = try {
     error.left()
 }
 
-suspend inline fun <reified T : Any> DefaultWebSocketSession.sendEvent(event: T) =
+suspend inline fun <reified TEvent : IOutboundEvent<TData>, reified TData> DefaultWebSocketSession.sendEvent(event: TEvent) =
     this.send(
         Frame.Text(
             json.encodeToString(
