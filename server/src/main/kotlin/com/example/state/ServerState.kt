@@ -37,7 +37,7 @@ suspend inline fun <reified TEvent : IOutboundEvent<TData>, reified TData> Atomi
 
 data class ServerState(
     var connections: Set<Connection> = Collections.synchronizedSet(LinkedHashSet()),
-    val rooms: MutableMap<String, RoomState>
+    val rooms: MutableMap<String, RoomState> = Collections.synchronizedMap(LinkedHashMap())
 ) {
     private var isRunning = false
 

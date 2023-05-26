@@ -1,4 +1,4 @@
-import QueuedMediaDto from "../routes/dtos/QueuedMediaDto"
+import QueuedMediaDto from "../dtos/QueuedMediaDto"
 
 export type EventFromServerType = "NEXT_MEDIA_STARTED" | "USER_SENT_MESSAGE"
 
