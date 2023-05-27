@@ -1,5 +1,8 @@
 package com.example
 
+import arrow.core.getOrHandle
+import com.example.func.getEnvVar
+import com.example.mongo.buildMongoFunctions
 import com.example.state.ServerState
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -10,12 +13,18 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import java.util.concurrent.atomic.AtomicReference
 
+private const val MONGO_CONNECTION_STRING_VAR_NAME = "MONGO_CONNECTION_STRING"
+
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
 fun Application.module() {
+    val mongoFunctions = getEnvVar(MONGO_CONNECTION_STRING_VAR_NAME).map { mongoConnectionString ->
+        buildMongoFunctions(mongoConnectionString)
+    }.getOrHandle { throw it }
+
     val serverState = AtomicReference(ServerState())
     serverState.get().start()
 
@@ -23,7 +32,7 @@ fun Application.module() {
     configureSerialization()
     configureSecurity()
     configureHTTP()
-    configureRouting(serverState)
+    configureRouting(serverState, mongoFunctions)
 }
 
 fun Application.configureSerialization() {

@@ -14,17 +14,17 @@ fun Route.getRoomById() = get("/{roomId}") {
         QueuedMediaDto(
             userWhoQueued = "pete",
             timeQueued = utcNow(),
-            videoId = "1"
+            mediaId = "1"
         ),
         QueuedMediaDto(
             userWhoQueued = "pete",
             timeQueued = utcNow(),
-            videoId = "2"
+            mediaId = "2"
         ),
         QueuedMediaDto(
             userWhoQueued = "pete",
             timeQueued = utcNow(),
-            videoId = "3"
+            mediaId = "3"
         )
     )
 

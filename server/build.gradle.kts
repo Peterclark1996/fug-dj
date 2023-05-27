@@ -33,4 +33,5 @@ dependencies {
     implementation("io.arrow-kt:arrow-core:1.0.1")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("org.mongodb:mongo-java-driver:3.12.13")
 }

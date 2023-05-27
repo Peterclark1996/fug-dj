@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class QueuedMediaDto(
     val userWhoQueued: String,
     val timeQueued: String,
-    val videoId: String
+    val mediaId: String
 )

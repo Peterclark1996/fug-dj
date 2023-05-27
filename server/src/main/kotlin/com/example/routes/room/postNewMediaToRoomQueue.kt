@@ -34,7 +34,7 @@ fun Route.postNewMediaToRoomQueue(serverState: AtomicReference<ServerState>) = p
                             queue = room.queue + QueuedMediaDto(
                                 userWhoQueued = "pete",
                                 timeQueued = utcNow(),
-                                videoId = dto.videoId
+                                mediaId = dto.videoId
                             )
                         )
 
