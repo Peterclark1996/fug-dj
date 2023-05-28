@@ -9,6 +9,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.bson.Document
 
 val json = Json { encodeDefaults = true }
 
@@ -17,6 +18,8 @@ fun parseStringToEvent(body: String) =
         .mapLeft { e -> Error("Failed to parse event.", e) }
 
 fun <T> KSerializer<T>.parse(body: String) = tryCatch { Json.decodeFromString(this, body) }
+
+fun <T> KSerializer<T>.parse(document: Document) = parse(document.toJson())
 
 inline fun <reified T> T.encode() = try {
     Json.encodeToString(this).right()

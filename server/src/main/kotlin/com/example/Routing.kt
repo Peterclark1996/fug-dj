@@ -2,6 +2,7 @@ package com.example
 
 import com.example.mongo.MongoFunctions
 import com.example.routes.playlist.getAllPlaylists
+import com.example.routes.playlist.postNewMedia
 import com.example.routes.room.getRoomById
 import com.example.routes.room.postNewMediaToRoomQueue
 import com.example.state.ServerState
@@ -27,6 +28,7 @@ fun Application.configureRouting(serverState: AtomicReference<ServerState>, mong
         route("/api") {
             route("/playlist") {
                 getAllPlaylists(mongoFunctions)
+                postNewMedia(mongoFunctions)
             }
             route("/room") {
                 getRoomById()

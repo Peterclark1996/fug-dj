@@ -11,4 +11,11 @@ fun <T> tryCatch(func: () -> T): Either<Error, T> =
         Error(e).left()
     }
 
+fun <T> tryCatchFlatMap(func: () -> Either<Error, T>): Either<Error, T> =
+    try {
+        func()
+    } catch (e: Throwable) {
+        Error(e).left()
+    }
+
 fun <T> T?.toEither(errorMessage: String = "No value") = this?.right() ?: Error(errorMessage).left()

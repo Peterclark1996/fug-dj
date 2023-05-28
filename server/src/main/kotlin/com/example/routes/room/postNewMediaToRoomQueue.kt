@@ -19,8 +19,8 @@ import kotlinx.serialization.Serializable
 import java.util.concurrent.atomic.AtomicReference
 
 @Serializable
-data class PostNewMediaToRoomQueueDto(
-    val videoId: String
+private data class PostNewMediaToRoomQueueDto(
+    val mediaId: String
 )
 
 fun Route.postNewMediaToRoomQueue(serverState: AtomicReference<ServerState>) = post("/{roomId}/queue") {
@@ -34,7 +34,7 @@ fun Route.postNewMediaToRoomQueue(serverState: AtomicReference<ServerState>) = p
                             queue = room.queue + QueuedMediaDto(
                                 userWhoQueued = "pete",
                                 timeQueued = utcNow(),
-                                mediaId = dto.videoId
+                                mediaId = dto.mediaId
                             )
                         )
 
