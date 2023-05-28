@@ -1,5 +1,5 @@
-import RoomPanel from "../../../types/RoomPanel"
-import PanelSelectionButton from "./PanelSelectionButton"
+import RoomPanel from "../../types/RoomPanel"
+import PanelSelectionButton from "../../library/PanelSelectionButton"
 
 type RoomControlProps = {
     selectedRoomPanel: RoomPanel
@@ -13,6 +13,7 @@ const RoomControl = ({ selectedRoomPanel, setSelectedRoomPanel }: RoomControlPro
                 icon="fa-comments"
                 backgroundColour="bg-cyan-200"
                 textColour="text-cyan-200"
+                direction="down"
                 selected={selectedRoomPanel === "chat"}
                 onClick={() => setSelectedRoomPanel("chat")}
             />
@@ -20,6 +21,7 @@ const RoomControl = ({ selectedRoomPanel, setSelectedRoomPanel }: RoomControlPro
                 icon="fa-list-ul"
                 backgroundColour="bg-green-300"
                 textColour="text-green-300"
+                direction="down"
                 selected={selectedRoomPanel === "queue"}
                 onClick={() => setSelectedRoomPanel("queue")}
             />
@@ -27,6 +29,7 @@ const RoomControl = ({ selectedRoomPanel, setSelectedRoomPanel }: RoomControlPro
                 icon="fa-users"
                 backgroundColour="bg-rose-300"
                 textColour="text-rose-300"
+                direction="down"
                 selected={selectedRoomPanel === "users"}
                 onClick={() => setSelectedRoomPanel("users")}
             />

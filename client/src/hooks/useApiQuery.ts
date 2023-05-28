@@ -1,18 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-
-type ApiState = {
-    errored: boolean
-    loading: boolean
-    loaded: boolean
-}
-
-const getApiUrl = () => {
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-        return "http://localhost:8080/api"
-    }
-    return `http://${window.location.host}/api`
-}
+import ApiState from "./ApiState"
+import { getApiUrl } from "./constants"
 
 const useApiQuery = <T>(url: string, canRun = true) => {
     const sanitisiedUrl = url.startsWith("/") ? url : "/" + url
@@ -51,8 +40,6 @@ const useApiQuery = <T>(url: string, canRun = true) => {
         })
 
         setLastFetchedUrl(sanitisiedUrl)
-
-        console.log(getApiUrl() + sanitisiedUrl)
 
         axios
             .get(getApiUrl() + sanitisiedUrl)

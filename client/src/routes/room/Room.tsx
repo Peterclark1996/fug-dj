@@ -4,7 +4,7 @@ import RoomStateDto from "../../dtos/RoomStateDto"
 import Loading from "../../library/Loading"
 import HeadInfo from "./HeadInfo"
 import HeadLogo from "./HeadLogo"
-import RoomControl from "./RoomControl/RoomControl"
+import RoomControl from "./RoomControl"
 import ChatPanel from "./ChatPanel"
 import { useState } from "react"
 import RoomPanel from "../../types/RoomPanel"
@@ -12,6 +12,9 @@ import QueuePanel from "./QueuePanel"
 import UsersPanel from "./UsersPanel"
 import RoomList from "./RoomList"
 import Stage from "./Stage"
+import MainContentControl from "./MainContentControl"
+import MainContentPanel from "../../types/MainContentPanel"
+import MediaLibrary from "./MediaLibrary"
 
 type RoomProps = {
     username: string
@@ -29,6 +32,7 @@ const Room = ({ username }: RoomProps) => {
     }
 
     const [selectedRoomPanel, setSelectedRoomPanel] = useState<RoomPanel>("chat")
+    const [selectedMainContentPanel, setSelectedMainContentPanel] = useState<MainContentPanel>("stage")
 
     const getRoomPanel = () => {
         switch (selectedRoomPanel) {
@@ -41,25 +45,36 @@ const Room = ({ username }: RoomProps) => {
         }
     }
 
+    const getMainContentPanel = () => {
+        switch (selectedMainContentPanel) {
+            case "stage":
+                return <Stage username={username} />
+            case "library":
+                return <MediaLibrary />
+        }
+    }
+
     return (
         <div className="h-screen w-screen">
             <Loading isLoading={roomStateRequest.isLoading}>
-                <div className="flex h-screen">
+                <div className="flex h-screen text-white">
                     <div className="flex flex-col">
                         <div className="flex h-12 bg-slate-500 drop-shadow-lg z-2">
                             <HeadLogo />
                         </div>
-                        <div className="flex grow bg-slate-600 z-1">
+                        <div className="flex flex-col grow bg-slate-600 z-1">
                             <RoomList />
+                            <MainContentControl
+                                selectedMainContentPanel={selectedMainContentPanel}
+                                setSelectedMainContentPanel={setSelectedMainContentPanel}
+                            />
                         </div>
                     </div>
                     <div className="flex grow flex-col">
                         <div className="flex h-12 bg-slate-500 drop-shadow-lg z-3">
                             <HeadInfo />
                         </div>
-                        <div className="flex grow bg-slate-700 z-0">
-                            <Stage username={username} />
-                        </div>
+                        <div className="flex grow bg-slate-700 z-0">{getMainContentPanel()}</div>
                     </div>
                     <div className="flex flex-col">
                         <div className="flex h-12 bg-slate-500 drop-shadow-lg z-2">
