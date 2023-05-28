@@ -14,7 +14,7 @@ import RoomList from "./RoomList"
 import Stage from "./Stage"
 import MainContentControl from "./MainContentControl"
 import MainContentPanel from "../../types/MainContentPanel"
-import MediaLibrary from "./MediaLibrary"
+import MediaLibrary from "./MediaLibrary/MediaLibrary"
 
 type RoomProps = {
     username: string
@@ -50,7 +50,7 @@ const Room = ({ username }: RoomProps) => {
             case "stage":
                 return <Stage username={username} />
             case "library":
-                return <MediaLibrary />
+                return <MediaLibrary onClose={() => setSelectedMainContentPanel("stage")} />
         }
     }
 
@@ -59,10 +59,10 @@ const Room = ({ username }: RoomProps) => {
             <Loading isLoading={roomStateRequest.isLoading}>
                 <div className="flex h-screen text-white">
                     <div className="flex flex-col">
-                        <div className="flex h-12 bg-slate-500 drop-shadow-lg z-2">
+                        <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <HeadLogo />
                         </div>
-                        <div className="flex flex-col grow bg-slate-600 z-1">
+                        <div className="flex flex-col grow bg-slate-600 form-emboss z-10">
                             <RoomList />
                             <MainContentControl
                                 selectedMainContentPanel={selectedMainContentPanel}
@@ -71,19 +71,19 @@ const Room = ({ username }: RoomProps) => {
                         </div>
                     </div>
                     <div className="flex grow flex-col">
-                        <div className="flex h-12 bg-slate-500 drop-shadow-lg z-3">
+                        <div className="flex h-12 bg-slate-500 form-emboss z-50">
                             <HeadInfo />
                         </div>
-                        <div className="flex grow bg-slate-700 z-0">{getMainContentPanel()}</div>
+                        <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>
                     </div>
                     <div className="flex flex-col">
-                        <div className="flex h-12 bg-slate-500 drop-shadow-lg z-2">
+                        <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <RoomControl
                                 selectedRoomPanel={selectedRoomPanel}
                                 setSelectedRoomPanel={setSelectedRoomPanel}
                             />
                         </div>
-                        <div className="flex grow bg-slate-600 z-1">{getRoomPanel()}</div>
+                        <div className="flex grow bg-slate-600 form-emboss z-10">{getRoomPanel()}</div>
                     </div>
                 </div>
             </Loading>

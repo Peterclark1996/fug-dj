@@ -1,15 +1,20 @@
 type ButtonProps = {
     className?: string
     icon?: string
-    text: string
+    text?: string
+    colour: string
     onClick: () => void
 }
 
-const Button = ({ className = "", icon, text, onClick }: ButtonProps) => {
+const Button = ({ className = "", icon, text, colour, onClick }: ButtonProps) => {
     return (
-        <div role="button" className={`${className} py-1 px-2 rounded bg-green-400 form-emboss`} onClick={onClick}>
-            {text}
-            {icon && <i className={`flex grow w-50% h-50% ms-2 fa-solid ${icon}`} />}
+        <div
+            role="button"
+            className={`${className} ${text ? "" : "w-9 "} h-9 py-1 px-2 rounded ${colour} form-emboss`}
+            onClick={onClick}
+        >
+            {text && text}
+            {icon && <i className={`flex grow w-50% h-50% ${text ? "ms-2" : "fa-xl"} fa-solid ${icon}`} />}
         </div>
     )
 }

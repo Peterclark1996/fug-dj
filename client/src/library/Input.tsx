@@ -11,7 +11,7 @@ const Input = ({ className = "", placeholder = "", value, onChange }: InputProps
     return (
         <input
             placeholder={placeholder}
-            className={`${className} rounded border-0 px-2 outline-none h-9 text-slate-800 form-deboss`}
+            className={`${className} w-80 rounded border-0 px-2 outline-none h-9 text-slate-800 form-deboss`}
             value={value}
             onChange={onInputChange}
         />

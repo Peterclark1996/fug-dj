@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import Input from "../../library/Input"
+import Button from "../../library/Button"
 
 type LoginProps = {
     username: string
@@ -20,13 +21,7 @@ const Login = ({ username, setUsername }: LoginProps) => {
                 <span className="text-4xl">Fug DJ</span>
                 <div className="flex mt-2">
                     <Input value={username} onChange={setUsername} />
-                    <div
-                        role="button"
-                        className="ms-2 py-1 px-2 rounded bg-green-400 form-emboss"
-                        onClick={onLoginClick}
-                    >
-                        Login
-                    </div>
+                    <Button className="ms-2" icon="fa-plus" text="Login" colour="bg-green-400" onClick={onLoginClick} />
                 </div>
             </div>
         </div>
