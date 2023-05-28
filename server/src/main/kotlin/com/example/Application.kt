@@ -2,8 +2,9 @@ package com.example
 
 import arrow.core.getOrHandle
 import com.example.func.getEnvVar
-import com.example.mongo.buildMongoFunctions
+import com.example.external.mongo.buildMongoFunctions
 import com.example.state.ServerState
+import com.example.external.youtube.buildYoutubeFunctions
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -14,6 +15,7 @@ import io.ktor.server.plugins.cors.routing.*
 import java.util.concurrent.atomic.AtomicReference
 
 private const val MONGO_CONNECTION_STRING_VAR_NAME = "MONGO_CONNECTION_STRING"
+private const val YOUTUBE_API_KEY_VAR_NAME = "YOUTUBE_API_KEY"
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -25,6 +27,10 @@ fun Application.module() {
         buildMongoFunctions(mongoConnectionString)
     }.getOrHandle { throw it }
 
+    val youtubeFunctions = getEnvVar(YOUTUBE_API_KEY_VAR_NAME).map { youtubeApiKey ->
+        buildYoutubeFunctions(youtubeApiKey)
+    }.getOrHandle { throw it }
+
     val serverState = AtomicReference(ServerState())
     serverState.get().start()
 
@@ -32,7 +38,7 @@ fun Application.module() {
     configureSerialization()
     configureSecurity()
     configureHTTP()
-    configureRouting(serverState, mongoFunctions)
+    configureRouting(serverState, mongoFunctions, youtubeFunctions)
 }
 
 fun Application.configureSerialization() {

@@ -19,3 +19,5 @@ fun <T> tryCatchFlatMap(func: () -> Either<Error, T>): Either<Error, T> =
     }
 
 fun <T> T?.toEither(errorMessage: String = "No value") = this?.right() ?: Error(errorMessage).left()
+
+fun Either<Error, Any>.mapToUnit() = this.map { }

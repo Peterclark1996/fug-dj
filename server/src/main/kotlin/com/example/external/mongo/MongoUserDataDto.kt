@@ -1,4 +1,4 @@
-package com.example.mongo
+package com.example.external.mongo
 
 import com.example.pojos.PlaylistDto
 import kotlinx.serialization.SerialName

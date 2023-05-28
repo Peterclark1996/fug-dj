@@ -34,4 +34,5 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.mongodb:mongo-java-driver:3.12.13")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 }

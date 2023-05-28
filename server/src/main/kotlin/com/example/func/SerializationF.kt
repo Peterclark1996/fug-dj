@@ -11,13 +11,16 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.bson.Document
 
-val json = Json { encodeDefaults = true }
+val json = Json {
+    encodeDefaults = true
+    ignoreUnknownKeys = true
+}
 
 fun parseStringToEvent(body: String) =
-    tryCatch { Json.decodeFromString(InboundEvent.serializer(), body) }
+    tryCatch { json.decodeFromString(InboundEvent.serializer(), body) }
         .mapLeft { e -> Error("Failed to parse event.", e) }
 
-fun <T> KSerializer<T>.parse(body: String) = tryCatch { Json.decodeFromString(this, body) }
+fun <T> KSerializer<T>.parse(body: String) = tryCatch { json.decodeFromString(this, body) }
 
 fun <T> KSerializer<T>.parse(document: Document) = parse(document.toJson())
 

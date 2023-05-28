@@ -2,7 +2,7 @@ package com.example.routes.playlist
 
 import arrow.core.flatMap
 import com.example.func.encode
-import com.example.mongo.MongoFunctions
+import com.example.external.mongo.MongoFunctions
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*

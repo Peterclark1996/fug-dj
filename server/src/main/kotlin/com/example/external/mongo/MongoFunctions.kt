@@ -1,8 +1,10 @@
-package com.example.mongo
+package com.example.external.mongo
 
 import arrow.core.Either
 import arrow.core.right
 import arrow.core.traverseEither
+import com.example.func.encode
+import com.example.func.mapToUnit
 import com.example.func.parse
 import com.example.func.tryCatchFlatMap
 import com.example.pojos.PlaylistDto
@@ -42,18 +44,18 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
 
             collection.updateOne(Document("_id", ObjectId(userId)), removeOperation, removeOptions)
 
-            val addOperation = Document(
-                "\$push",
-                Document(
-                    "playlists.\$[playlist].media",
-                    media.toBsonDocument()
+            media.encode().map { mediaAsJson ->
+                val addOperation = Document(
+                    "\$push",
+                    Document(
+                        "playlists.\$[playlist].media",
+                        Document.parse(mediaAsJson)
+                    )
                 )
-            )
-            val addOptions = UpdateOptions().arrayFilters(arrayFilters)
+                val addOptions = UpdateOptions().arrayFilters(arrayFilters)
 
-            collection.updateOne(Document("_id", ObjectId(userId)), addOperation, addOptions)
-
-            Unit.right()
+                collection.updateOne(Document("_id", ObjectId(userId)), addOperation, addOptions)
+            }.mapToUnit()
         }
     },
     getAllPlaylists = { userId ->
