@@ -1,8 +1,9 @@
 import Login from "./login/Login"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useState } from "react"
-import { WebSocketProvider } from "../socket/WebSocketContext"
+import { WebSocketProvider } from "../contexts/socket/WebSocketContext"
 import Room from "./room/Room"
+import { UserMediaProvider } from "../contexts/UserMediaContext"
 
 const App = () => {
     const [username, setUsername] = useState<string>("")
@@ -14,9 +15,11 @@ const App = () => {
                 <Route
                     path="/room/:roomId"
                     element={
-                        <WebSocketProvider>
-                            <Room username={username} />
-                        </WebSocketProvider>
+                        <UserMediaProvider>
+                            <WebSocketProvider>
+                                <Room username={username} />
+                            </WebSocketProvider>
+                        </UserMediaProvider>
                     }
                 />
                 <Route path="*" element={<Navigate to="/login" replace />} />

@@ -42,7 +42,11 @@ const onEventReceived = (messageEvent: MessageEvent<EventFromServer>) => {
     if (listener != undefined) listener(event)
 }
 
-export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
+type WebSocketProviderProps = {
+    children: ReactNode
+}
+
+export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     const [connection, setConnection] = useState<WebSocket | undefined>()
 
     const [hasFailedToConnect, setHasFailedToConnect] = useState(false)
