@@ -86,7 +86,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
             val collection: MongoCollection<Document> = database.getCollection("user_data")
 
             val filter = Filters.and(
-                Filters.eq("_id", userId),
+                Filters.eq("_id", ObjectId(userId)),
                 Filters.eq("playlists.id", playlistId),
                 Filters.eq("playlists.media.mediaId", mediaId)
             )

@@ -1,5 +1,5 @@
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import ApiState from "./ApiState"
 import { getApiUrl } from "./constants"
 
@@ -28,11 +28,7 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
         setCouldRunImmediately(canRunImmediately)
     }, [canRunImmediately, couldRunImmediately])
 
-    useEffect(() => {
-        if (lastFetchedUrl === sanitisiedUrl && (state.errored || state.loading || state.loaded)) return
-
-        if (!canRunImmediately) return
-
+    const callApi = useCallback(() => {
         setState({
             errored: false,
             loading: true,
@@ -41,7 +37,7 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
 
         setLastFetchedUrl(sanitisiedUrl)
 
-        axios
+        return axios
             .get(getApiUrl() + sanitisiedUrl)
             .then(res => {
                 setState({
@@ -59,16 +55,20 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
                     loaded: true
                 })
             })
-    }, [canRunImmediately, lastFetchedUrl, state, sanitisiedUrl])
+    }, [sanitisiedUrl])
+
+    useEffect(() => {
+        if (lastFetchedUrl === sanitisiedUrl && (state.errored || state.loading || state.loaded)) return
+
+        if (!canRunImmediately) return
+
+        callApi()
+    }, [callApi, canRunImmediately, lastFetchedUrl, sanitisiedUrl, state.errored, state.loaded, state.loading])
 
     const execute = () => {
         if (state.loading) return
 
-        setState({
-            errored: false,
-            loading: false,
-            loaded: false
-        })
+        return callApi()
     }
 
     return { data, hasErrored: state.errored, isLoading: state.loading, hasLoaded: state.loaded, execute }
