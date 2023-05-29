@@ -48,7 +48,7 @@ fun Application.configureRouting(
                 patchMedia(mongoFunctions)
             }
             route("/room") {
-                getRoomById()
+                getRoomById(serverState)
                 postNewMediaToRoomQueue(serverState)
             }
         }
@@ -59,13 +59,6 @@ suspend inline fun <reified T> ApplicationCall.respondWith(response: Either<Erro
     response.flatMap {
         it.encode()
     }.fold({
-        this.handleFailureResponse(it)
-    }, {
-        this.respondText(it)
-    })
-
-suspend inline fun <reified T> ApplicationCall.respondWith(response: T) =
-    response.encode().fold({
         this.handleFailureResponse(it)
     }, {
         this.respondText(it)

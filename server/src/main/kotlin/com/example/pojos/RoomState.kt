@@ -5,22 +5,22 @@ import kotlinx.serialization.Serializable
 
 data class RoomState(
     val id: String,
-    val name: String,
+    val displayName: String,
     val connectedUsers: Set<Connection>,
     val queue: Set<QueuedMediaDto>
 ) {
     fun toDto(): RoomStateDto {
         return RoomStateDto(
-            name = name,
-            connectedUsers = connectedUsers.map { it.username },
-            queue = queue.toList()
+            displayName = displayName,
+            connectedUsers = connectedUsers.map { it.username }.toSet(),
+            queue = queue
         )
     }
 }
 
 @Serializable
 data class RoomStateDto(
-    val name: String,
-    val connectedUsers: List<String>,
-    val queue: List<QueuedMediaDto>
+    val displayName: String,
+    val connectedUsers: Set<String>,
+    val queue: Set<QueuedMediaDto>
 )

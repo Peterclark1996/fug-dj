@@ -1,18 +1,19 @@
 package com.example
 
 import arrow.core.flatMap
+import arrow.core.getOrHandle
 import com.example.events.deserializeEventData
-import com.example.events.outbound.OutboundNextMediaStarted
 import com.example.func.parseStringToEvent
-import com.example.func.sendEvent
+import com.example.func.toEither
+import com.example.pojos.RoomState
 import com.example.state.Connection
 import com.example.state.ServerState
+import com.example.state.mutateAtomically
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import java.time.Duration
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
@@ -23,9 +24,35 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
         masking = false
     }
     routing {
-        webSocket("/socket/room") {
+        webSocket("/socket/room/{roomId}") {
             val thisConnection = Connection(this)
+
             serverState.get().connections += thisConnection
+
+
+
+            serverState.mutateAtomically { state ->
+                call.parameters["roomId"].toEither().map { roomId ->
+                    val roomState = state.rooms[roomId]
+
+                    if (roomState == null) {
+                        state.rooms[roomId] = RoomState(
+                            roomId,
+                            "Virtual Room (Not from DB): $roomId",
+                            setOf(thisConnection),
+                            emptySet()
+                        )
+                    } else {
+                        state.rooms[roomId] = RoomState(
+                            roomState.id,
+                            roomState.displayName,
+                            roomState.connectedUsers + thisConnection,
+                            roomState.queue,
+                        )
+                    }
+                }
+            }.getOrHandle { throw it }
+
             try {
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue

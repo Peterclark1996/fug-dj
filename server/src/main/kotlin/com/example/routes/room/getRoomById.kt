@@ -1,36 +1,19 @@
 package com.example.routes.room
 
-import com.example.func.utcNow
-import com.example.pojos.QueuedMediaDto
-import com.example.pojos.RoomStateDto
+import com.example.NotFoundError
+import com.example.func.toEither
 import com.example.respondWith
+import com.example.state.ServerState
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import java.util.concurrent.atomic.AtomicReference
 
-fun Route.getRoomById() = get("/{roomId}") {
-    val queuedMedia = listOf(
-        QueuedMediaDto(
-            userWhoQueued = "pete",
-            timeQueued = utcNow(),
-            mediaId = "1"
-        ),
-        QueuedMediaDto(
-            userWhoQueued = "pete",
-            timeQueued = utcNow(),
-            mediaId = "2"
-        ),
-        QueuedMediaDto(
-            userWhoQueued = "pete",
-            timeQueued = utcNow(),
-            mediaId = "3"
-        )
-    )
+fun Route.getRoomById(serverState: AtomicReference<ServerState>) = get("/{roomId}") {
+    val roomState = serverState.get().rooms[call.parameters["roomId"]]
 
-    val roomState = RoomStateDto(
-        name = "Room ${call.parameters["roomId"]}",
-        connectedUsers = listOf("pete"),
-        queue = queuedMedia
-    )
+    val result = roomState.toEither()
+        .map { it.toDto() }
+        .mapLeft { NotFoundError("Failed to find room with id: '${call.parameters["roomId"]}'") }
 
-    call.respondWith(roomState)
+    call.respondWith(result)
 }
