@@ -16,6 +16,7 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.UpdateOptions
+import com.mongodb.client.model.Updates
 import org.bson.Document
 import org.bson.types.ObjectId
 
@@ -23,6 +24,8 @@ private const val DATABASE_NAME = "fugdj"
 
 data class MongoFunctions(
     val createMediaF: (userId: String, playlistId: String, media: SavedMediaDto) -> Either<Error, Unit>,
+    val deleteMediaF: (userId: String, playlistId: String, mediaId: String) -> Either<Error, Unit>,
+    val updateMediaDisplayNameF: (userId: String, playlistId: String, mediaId: String, displayName: String) -> Either<Error, Unit>,
     val getAllPlaylists: (userId: String) -> Either<Error, List<PlaylistDto>>
 )
 
@@ -56,6 +59,44 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
 
                 collection.updateOne(Document("_id", ObjectId(userId)), addOperation, addOptions)
             }.mapToUnit()
+        }
+    },
+    deleteMediaF = { userId, playlistId, mediaId ->
+        callMongoTryCatch(mongoConnectionString) { database ->
+            val collection: MongoCollection<Document> = database.getCollection("user_data")
+
+            val arrayFilters = listOf(Filters.eq("playlist.id", playlistId))
+
+            val removeOperation = Document(
+                "\$pull",
+                Document(
+                    "playlists.\$[playlist].media",
+                    Document("mediaId", mediaId)
+                )
+            )
+            val removeOptions = UpdateOptions().arrayFilters(arrayFilters)
+
+            collection.updateOne(Document("_id", ObjectId(userId)), removeOperation, removeOptions)
+
+            Unit.right()
+        }
+    },
+    updateMediaDisplayNameF = { userId, playlistId, mediaId, displayName ->
+        callMongoTryCatch(mongoConnectionString) { database ->
+            val collection: MongoCollection<Document> = database.getCollection("user_data")
+
+            val filter = Filters.and(
+                Filters.eq("_id", userId),
+                Filters.eq("playlists.id", playlistId),
+                Filters.eq("playlists.media.mediaId", mediaId)
+            )
+
+            val update = Updates.set("playlists.$.media.$[media].displayName", displayName)
+            val arrayFilters = listOf(Filters.eq("media.mediaId", mediaId))
+
+            collection.updateOne(filter, update, UpdateOptions().arrayFilters(arrayFilters))
+
+            Unit.right()
         }
     },
     getAllPlaylists = { userId ->

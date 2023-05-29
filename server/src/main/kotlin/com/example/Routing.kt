@@ -7,6 +7,8 @@ import com.example.routes.room.getRoomById
 import com.example.routes.room.postNewMediaToRoomQueue
 import com.example.state.ServerState
 import com.example.external.youtube.YoutubeFunctions
+import com.example.routes.playlist.deleteMedia
+import com.example.routes.playlist.patchMedia
 import io.ktor.server.routing.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
@@ -34,6 +36,8 @@ fun Application.configureRouting(
             route("/playlist") {
                 getAllPlaylists(mongoFunctions)
                 postNewMedia(mongoFunctions, youtubeFunctions)
+                deleteMedia(mongoFunctions)
+                patchMedia(mongoFunctions)
             }
             route("/room") {
                 getRoomById()
