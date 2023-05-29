@@ -3,6 +3,7 @@ package com.example.func
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.example.NotFoundError
 
 fun <T> tryCatch(func: () -> T): Either<Error, T> =
     try {
@@ -18,6 +19,6 @@ fun <T> tryCatchFlatMap(func: () -> Either<Error, T>): Either<Error, T> =
         Error(e).left()
     }
 
-fun <T> T?.toEither(errorMessage: String = "No value") = this?.right() ?: Error(errorMessage).left()
+fun <T> T?.toEither(errorMessage: String = "No value") = this?.right() ?: NotFoundError(errorMessage).left()
 
 fun Either<Error, Any>.mapToUnit() = this.map { }

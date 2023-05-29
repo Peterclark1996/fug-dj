@@ -6,6 +6,6 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
 fun Route.getAllPlaylists(mongoFunctions: MongoFunctions) = get {
-    val response = mongoFunctions.getAllPlaylists("6472888133a5d88dea146111")
+    val response = mongoFunctions.getAllPlaylistsF("6472888133a5d88dea146111")
     call.respondWith(response)
 }

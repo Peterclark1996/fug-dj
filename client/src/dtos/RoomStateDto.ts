@@ -1,7 +1,7 @@
 import QueuedMediaDto from "./QueuedMediaDto"
 
 type RoomStateDto = {
-    name: string
+    displayName: string
     connectedUsers: string[]
     queue: QueuedMediaDto[]
 }

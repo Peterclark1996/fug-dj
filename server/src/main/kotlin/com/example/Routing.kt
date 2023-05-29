@@ -49,7 +49,7 @@ fun Application.configureRouting(
             }
             route("/room") {
                 getRoomById(serverState)
-                postNewMediaToRoomQueue(serverState)
+                postNewMediaToRoomQueue(mongoFunctions, serverState)
             }
         }
     }
@@ -68,5 +68,8 @@ suspend fun ApplicationCall.handleFailureResponse(error: Error) =
     when (error) {
         is BadRequestError -> this.respond(HttpStatusCode.BadRequest)
         is NotFoundError -> this.respond(HttpStatusCode.NotFound)
-        else -> this.respond(HttpStatusCode.InternalServerError)
+        else -> {
+            println(error.message + "\n" + error.stackTraceToString())
+            this.respond(HttpStatusCode.InternalServerError)
+        }
     }
