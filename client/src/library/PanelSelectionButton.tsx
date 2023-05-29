@@ -17,7 +17,8 @@ const PanelSelectionButton = ({
 }: PanelSelectionButtonProps) => {
     return (
         <div
-            className={`flex ${direction === "down" ? "flex-col" : ""} grow items-stretch cursor-pointer bg-slate-600`}
+            role="button"
+            className={`flex ${direction === "down" ? "flex-col" : ""} grow items-stretch bg-slate-600`}
             onClick={onClick}
         >
             <i className={`flex grow w-50% h-50% p-3 ${selected ? textColour : "text-slate-800"} fa-solid ${icon}`} />

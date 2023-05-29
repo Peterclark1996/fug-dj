@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import ApiState from "./ApiState"
 import { getApiUrl } from "./constants"
 
-const useApiQuery = <T>(url: string, canRun = true) => {
+const useApiQuery = <T>(url: string, canRunImmediately = true) => {
     const sanitisiedUrl = url.startsWith("/") ? url : "/" + url
 
     const [lastFetchedUrl, setLastFetchedUrl] = useState<string>()
@@ -13,10 +13,10 @@ const useApiQuery = <T>(url: string, canRun = true) => {
         loading: false,
         loaded: false
     })
-    const [couldRun, setCouldRun] = useState(canRun)
+    const [couldRunImmediately, setCouldRunImmediately] = useState(canRunImmediately)
 
     useEffect(() => {
-        if (!couldRun && canRun) {
+        if (!couldRunImmediately && canRunImmediately) {
             setLastFetchedUrl(undefined)
             setData(undefined)
             setState({
@@ -25,13 +25,13 @@ const useApiQuery = <T>(url: string, canRun = true) => {
                 loaded: false
             })
         }
-        setCouldRun(canRun)
-    }, [canRun, couldRun])
+        setCouldRunImmediately(canRunImmediately)
+    }, [canRunImmediately, couldRunImmediately])
 
     useEffect(() => {
         if (lastFetchedUrl === sanitisiedUrl && (state.errored || state.loading || state.loaded)) return
 
-        if (!canRun) return
+        if (!canRunImmediately) return
 
         setState({
             errored: false,
@@ -59,9 +59,19 @@ const useApiQuery = <T>(url: string, canRun = true) => {
                     loaded: true
                 })
             })
-    }, [canRun, lastFetchedUrl, state, sanitisiedUrl])
+    }, [canRunImmediately, lastFetchedUrl, state, sanitisiedUrl])
 
-    return { data, hasErrored: state.errored, isLoading: state.loading, hasLoaded: state.loaded }
+    const execute = () => {
+        if (state.loading) return
+
+        setState({
+            errored: false,
+            loading: false,
+            loaded: false
+        })
+    }
+
+    return { data, hasErrored: state.errored, isLoading: state.loading, hasLoaded: state.loaded, execute }
 }
 
 export default useApiQuery

@@ -71,7 +71,7 @@ const Room = ({ username }: RoomProps) => {
                         </div>
                     </div>
                     <div className="flex grow flex-col">
-                        <div className="flex h-12 bg-slate-500 form-emboss z-50">
+                        <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <HeadInfo />
                         </div>
                         <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>

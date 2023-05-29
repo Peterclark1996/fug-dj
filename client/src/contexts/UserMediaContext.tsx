@@ -4,8 +4,10 @@ import PlaylistDto from "../dtos/PlaylistDto"
 
 const UserMediaContext = createContext<{
     playlists: PlaylistDto[]
+    fetchPlaylists: () => void
 }>({
-    playlists: []
+    playlists: [],
+    fetchPlaylists: () => undefined
 })
 
 type UserMediaProviderProps = {
@@ -16,7 +18,8 @@ export const UserMediaProvider = ({ children }: UserMediaProviderProps) => {
     const userPlaylistsRequest = useApiQuery<PlaylistDto[]>(`playlist`)
 
     const value = {
-        playlists: userPlaylistsRequest.data ?? []
+        playlists: userPlaylistsRequest.data ?? [],
+        fetchPlaylists: userPlaylistsRequest.execute
     }
 
     return <UserMediaContext.Provider value={value}>{children}</UserMediaContext.Provider>

@@ -1,6 +1,7 @@
 type SavedMediaDto = {
     displayName: string
     mediaId: string
+    thumbnailUrl: string
     lengthInSeconds: number
 }
 

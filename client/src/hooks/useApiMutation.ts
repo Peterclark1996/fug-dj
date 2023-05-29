@@ -13,8 +13,8 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
         loaded: false
     })
 
-    const execute = (requestBody: unknown) => {
-        if (state.loading) return
+    const execute = (requestBody: unknown = undefined) => {
+        if (state.loading) return Promise.resolve()
 
         setState({
             errored: false,
@@ -22,7 +22,7 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
             loaded: false
         })
 
-        callAxiosWithMethod(method, getApiUrl() + sanitisiedUrl, requestBody)
+        return callAxiosWithMethod(method, getApiUrl() + sanitisiedUrl, requestBody)
             .then(res => {
                 setState({
                     errored: false,
