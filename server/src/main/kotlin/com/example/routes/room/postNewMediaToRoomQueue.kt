@@ -6,17 +6,18 @@ import com.example.func.parse
 import com.example.func.toEither
 import com.example.func.utcNow
 import com.example.pojos.QueuedMediaDto
+import com.example.respondWith
 import com.example.state.ServerState
 import com.example.state.mutateAtomically
 import com.example.state.sendToRoom
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.plus
+import kotlin.collections.set
 
 @Serializable
 private data class PostNewMediaToRoomQueueDto(
@@ -26,7 +27,7 @@ private data class PostNewMediaToRoomQueueDto(
 fun Route.postNewMediaToRoomQueue(serverState: AtomicReference<ServerState>) = post("/{roomId}/queue") {
     val jsonBody = this.call.receiveText()
     coroutineScope {
-        PostNewMediaToRoomQueueDto.serializer().parse(jsonBody).flatMap { dto ->
+        val response = PostNewMediaToRoomQueueDto.serializer().parse(jsonBody, true).flatMap { dto ->
             call.parameters["roomId"].toEither().flatMap { roomId ->
                 serverState.mutateAtomically { serverStateSafe ->
                     serverStateSafe.rooms[roomId].toEither("Failed to find room with id: '$roomId'").flatMap { room ->
@@ -44,6 +45,8 @@ fun Route.postNewMediaToRoomQueue(serverState: AtomicReference<ServerState>) = p
                     }
                 }
             }
-        }.fold({ call.respond(HttpStatusCode.InternalServerError) }, { call.respond(HttpStatusCode.OK) })
+        }
+
+        call.respondWith(response)
     }
 }

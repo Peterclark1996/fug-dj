@@ -1,8 +1,10 @@
 package com.example.external.mongo
 
 import arrow.core.Either
+import arrow.core.left
 import arrow.core.right
 import arrow.core.traverseEither
+import com.example.NotFoundError
 import com.example.func.encode
 import com.example.func.mapToUnit
 import com.example.func.parse
@@ -76,9 +78,13 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
             )
             val removeOptions = UpdateOptions().arrayFilters(arrayFilters)
 
-            collection.updateOne(Document("_id", ObjectId(userId)), removeOperation, removeOptions)
+            val result = collection.updateOne(Document("_id", ObjectId(userId)), removeOperation, removeOptions)
 
-            Unit.right()
+            if (result.matchedCount == 0L) {
+                NotFoundError("Could not find media with id $mediaId in playlist with id $playlistId for user with id $userId").left()
+            } else {
+                Unit.right()
+            }
         }
     },
     updateMediaDisplayNameF = { userId, playlistId, mediaId, displayName ->
@@ -94,9 +100,13 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
             val update = Updates.set("playlists.$.media.$[media].displayName", displayName)
             val arrayFilters = listOf(Filters.eq("media.mediaId", mediaId))
 
-            collection.updateOne(filter, update, UpdateOptions().arrayFilters(arrayFilters))
+            val result = collection.updateOne(filter, update, UpdateOptions().arrayFilters(arrayFilters))
 
-            Unit.right()
+            if (result.matchedCount == 0L) {
+                NotFoundError("Could not find media with id $mediaId in playlist with id $playlistId for user with id $userId").left()
+            } else {
+                Unit.right()
+            }
         }
     },
     getAllPlaylists = { userId ->
@@ -130,6 +140,4 @@ private fun <T> callMongoTryCatch(
         mongoClient.close()
 
         result
-    }.mapLeft {
-        Error("Mongo error: ${it.message}")
     }

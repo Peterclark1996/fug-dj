@@ -1,12 +1,10 @@
 package com.example.routes.room
 
+import com.example.func.utcNow
 import com.example.pojos.QueuedMediaDto
 import com.example.pojos.RoomStateDto
-import com.example.func.encode
-import com.example.func.utcNow
-import io.ktor.http.*
+import com.example.respondWith
 import io.ktor.server.application.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.getRoomById() = get("/{roomId}") {
@@ -34,7 +32,5 @@ fun Route.getRoomById() = get("/{roomId}") {
         queue = queuedMedia
     )
 
-    val json = roomState.encode()
-
-    json.fold({ call.respond(HttpStatusCode.InternalServerError) }, { call.respondText(it) })
+    call.respondWith(roomState)
 }

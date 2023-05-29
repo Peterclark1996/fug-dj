@@ -24,6 +24,6 @@ fun buildYoutubeFunctions(youtubeToken: String) = YoutubeFunctions { videoId ->
     if (!response.isSuccessful) {
         Error("Youtube API call failed").left()
     } else {
-        response.body?.string().toEither().flatMap { YoutubeVideosResponse.serializer().parse(it) }
+        response.body?.string().toEither().flatMap { YoutubeVideosResponse.serializer().parse(it, false) }
     }
 }

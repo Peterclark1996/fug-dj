@@ -4,16 +4,16 @@ import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.left
 import arrow.core.right
+import com.example.BadRequestError
+import com.example.external.mongo.MongoFunctions
+import com.example.external.youtube.YoutubeFunctions
 import com.example.func.parse
 import com.example.func.toEither
 import com.example.func.tryCatch
-import com.example.external.mongo.MongoFunctions
 import com.example.pojos.SavedMediaDto
-import com.example.external.youtube.YoutubeFunctions
-import io.ktor.http.*
+import com.example.respondWith
 import io.ktor.server.application.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 
@@ -25,13 +25,13 @@ private data class PostNewMediaDto(
 fun Route.postNewMedia(mongoFunctions: MongoFunctions, youtubeFunctions: YoutubeFunctions) =
     post("/{playlistId}/media") {
         val jsonBody = this.call.receiveText()
-        PostNewMediaDto.serializer().parse(jsonBody).flatMap { dto ->
+        val response = PostNewMediaDto.serializer().parse(jsonBody, true).flatMap { dto ->
             val isYoutubeUrl = dto.url.contains("youtube.com/watch?v=")
             val regex = Regex("(?<=\\?v=)[^&]+")
             val videoId = regex.find(dto.url)?.groupValues?.firstOrNull()
 
             if (!isYoutubeUrl || videoId == null) {
-                Error("Not a youtube video").left()
+                BadRequestError("Not a youtube video").left()
             } else {
                 youtubeFunctions.getMediaInfoF(videoId).flatMap { videoInfos ->
                     tryCatch { videoInfos.items.single() }.flatMap { videoInfo ->
@@ -54,7 +54,9 @@ fun Route.postNewMedia(mongoFunctions: MongoFunctions, youtubeFunctions: Youtube
                     }
                 }
             }
-        }.fold({ call.respond(HttpStatusCode.InternalServerError) }, { call.respond(HttpStatusCode.OK) })
+        }
+
+        call.respondWith(response)
     }
 
 private fun convertTimeStringToSeconds(timeString: String): Either<Error, Int> {
@@ -69,5 +71,5 @@ private fun convertTimeStringToSeconds(timeString: String): Either<Error, Int> {
         return totalSeconds.right()
     }
 
-    return Error("Invalid time string").left()
+    return BadRequestError("Invalid time string").left()
 }

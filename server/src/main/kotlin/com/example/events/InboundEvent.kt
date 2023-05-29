@@ -10,6 +10,6 @@ data class InboundEvent(val type: InboundEventType, val jsonData: String)
 
 fun deserializeEventData(event: InboundEvent): Either<Error, IInboundEvent> =
     when (event.type) {
-        InboundEventType.USER_SENT_MESSAGE -> InboundUserSentMessage.serializer().parse(event.jsonData)
+        InboundEventType.USER_SENT_MESSAGE -> InboundUserSentMessage.serializer().parse(event.jsonData, true)
     }
 
