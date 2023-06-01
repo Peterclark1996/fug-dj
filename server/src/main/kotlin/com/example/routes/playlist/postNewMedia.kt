@@ -5,6 +5,7 @@ import arrow.core.flatMap
 import arrow.core.left
 import arrow.core.right
 import com.example.BadRequestError
+import com.example.TEMP_USER_ID
 import com.example.external.mongo.MongoFunctions
 import com.example.external.youtube.YoutubeFunctions
 import com.example.func.parse
@@ -37,10 +38,9 @@ fun Route.postNewMedia(mongoFunctions: MongoFunctions, youtubeFunctions: Youtube
                     tryCatch { videoInfos.items.single() }.flatMap { videoInfo ->
                         convertTimeStringToSeconds(videoInfo.contentDetails.duration).flatMap { mediaDuration ->
                             call.parameters["playlistId"].toEither().flatMap { playlistId ->
-                                val userId = "6472888133a5d88dea146111"
                                 val mediaId = "y$videoId"
                                 mongoFunctions.createMediaF(
-                                    userId,
+                                    TEMP_USER_ID,
                                     playlistId,
                                     SavedMediaDto(
                                         mediaId,

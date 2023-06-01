@@ -1,6 +1,7 @@
 package com.example.routes.room
 
 import arrow.core.flatMap
+import com.example.TEMP_USER_ID
 import com.example.events.outbound.OutboundRoomStateUpdated
 import com.example.external.mongo.MongoFunctions
 import com.example.func.parse
@@ -29,7 +30,7 @@ fun Route.postNewMediaToRoomQueue(mongoFunctions: MongoFunctions, serverState: A
 
         val response =
             PostNewMediaToRoomQueueDto.serializer().parse(jsonBody, true).flatMap { dto ->
-                mongoFunctions.getAllPlaylistsF("6472888133a5d88dea146111").flatMap { playlists ->
+                mongoFunctions.getAllPlaylistsF(TEMP_USER_ID).flatMap { playlists ->
                     playlists.find { it.id == dto.playlistId }?.media?.find { it.mediaId == dto.mediaId }.toEither()
                         .flatMap { savedMediaDto ->
                             call.parameters["roomId"].toEither().flatMap { roomId ->
@@ -37,11 +38,15 @@ fun Route.postNewMediaToRoomQueue(mongoFunctions: MongoFunctions, serverState: A
                                     val existingRoom = state.rooms[roomId]
 
                                     if (existingRoom != null) {
+                                        val usersPlaceInQueue =
+                                            existingRoom.queue.find { it.userWhoQueued == TEMP_USER_ID }?.timeQueued
+
                                         val updatedRoom = existingRoom.copy(
-                                            queue = existingRoom.queue + QueuedMediaDto(
+                                            queue = existingRoom.queue.filter { it.userWhoQueued != TEMP_USER_ID }
+                                                .toSet() + QueuedMediaDto(
                                                 mediaId = savedMediaDto.mediaId,
-                                                userWhoQueued = "pete",
-                                                timeQueued = utcNow(),
+                                                userWhoQueued = TEMP_USER_ID,
+                                                timeQueued = usersPlaceInQueue ?: utcNow(),
                                                 displayName = savedMediaDto.displayName,
                                                 thumbnailUrl = savedMediaDto.thumbnailUrl,
                                                 lengthInSeconds = savedMediaDto.lengthInSeconds

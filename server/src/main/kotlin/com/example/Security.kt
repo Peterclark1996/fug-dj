@@ -5,6 +5,8 @@ import io.ktor.server.response.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
+const val TEMP_USER_ID = "6472888133a5d88dea146111"
+
 fun Application.configureSecurity() {
 
     authentication {

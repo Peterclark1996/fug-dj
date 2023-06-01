@@ -1,6 +1,7 @@
 package com.example.routes.playlist
 
 import arrow.core.flatMap
+import com.example.TEMP_USER_ID
 import com.example.external.mongo.MongoFunctions
 import com.example.func.parse
 import com.example.func.toEither
@@ -21,8 +22,7 @@ fun Route.patchMedia(mongoFunctions: MongoFunctions) =
         val response = PatchMediaDto.serializer().parse(jsonBody, true).flatMap { dto ->
             call.parameters["playlistId"].toEither().flatMap { playlistId ->
                 call.parameters["mediaId"].toEither().flatMap { mediaId ->
-                    val userId = "6472888133a5d88dea146111"
-                    mongoFunctions.updateMediaDisplayNameF(userId, playlistId, mediaId, dto.displayName)
+                    mongoFunctions.updateMediaDisplayNameF(TEMP_USER_ID, playlistId, mediaId, dto.displayName)
                 }
             }
         }
