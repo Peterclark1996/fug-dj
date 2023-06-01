@@ -36,11 +36,13 @@ inline fun <reified T> T.encode() = try {
 }
 
 suspend inline fun <reified TEvent : IOutboundEvent<TData>, reified TData> DefaultWebSocketSession.sendEvent(event: TEvent) =
-    this.send(
-        Frame.Text(
-            json.encodeToString(
-                serializer(),
-                event
+    tryCatchSuspend {
+        this.send(
+            Frame.Text(
+                json.encodeToString(
+                    serializer(),
+                    event
+                )
             )
         )
-    )
+    }

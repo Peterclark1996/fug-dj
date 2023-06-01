@@ -9,15 +9,12 @@ import com.example.func.utcNow
 import com.example.pojos.QueuedMediaDto
 import com.example.respondWith
 import com.example.state.ServerState
-import com.example.state.mutateAtomically
 import com.example.state.sendToRoom
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.collections.plus
 import kotlin.collections.set
 
 @Serializable
@@ -36,29 +33,31 @@ fun Route.postNewMediaToRoomQueue(mongoFunctions: MongoFunctions, serverState: A
                     playlists.find { it.id == dto.playlistId }?.media?.find { it.mediaId == dto.mediaId }.toEither()
                         .flatMap { savedMediaDto ->
                             call.parameters["roomId"].toEither().flatMap { roomId ->
-                                serverState.mutateAtomically { serverStateSafe ->
-                                    serverStateSafe.rooms[roomId].toEither("Failed to find room with id: '$roomId'")
-                                        .flatMap { room ->
-                                            val updatedRoom = room.copy(
-                                                queue = room.queue + QueuedMediaDto(
-                                                    mediaId = savedMediaDto.mediaId,
-                                                    userWhoQueued = "pete",
-                                                    timeQueued = utcNow(),
-                                                    displayName = savedMediaDto.displayName,
-                                                    thumbnailUrl = savedMediaDto.thumbnailUrl,
-                                                    lengthInSeconds = savedMediaDto.lengthInSeconds
-                                                )
+                                serverState.getAndUpdate { state ->
+                                    val existingRoom = state.rooms[roomId]
+
+                                    if (existingRoom != null) {
+                                        val updatedRoom = existingRoom.copy(
+                                            queue = existingRoom.queue + QueuedMediaDto(
+                                                mediaId = savedMediaDto.mediaId,
+                                                userWhoQueued = "pete",
+                                                timeQueued = utcNow(),
+                                                displayName = savedMediaDto.displayName,
+                                                thumbnailUrl = savedMediaDto.thumbnailUrl,
+                                                lengthInSeconds = savedMediaDto.lengthInSeconds
                                             )
+                                        )
+                                        state.rooms[roomId] = updatedRoom
+                                    }
 
-                                            serverStateSafe.rooms[roomId] = updatedRoom
+                                    state
+                                }
 
-                                            coroutineScope {
-                                                serverState.sendToRoom(
-                                                    roomId,
-                                                    OutboundRoomStateUpdated(updatedRoom.toDto())
-                                                )
-                                            }
-                                        }
+                                serverState.get().rooms[roomId].toEither().flatMap { updatedRoom ->
+                                    serverState.sendToRoom(
+                                        roomId,
+                                        OutboundRoomStateUpdated(updatedRoom.toDto())
+                                    )
                                 }
                             }
                         }

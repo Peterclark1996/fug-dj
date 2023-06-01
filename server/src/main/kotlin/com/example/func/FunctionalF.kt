@@ -12,6 +12,13 @@ fun <T> tryCatch(func: () -> T): Either<Error, T> =
         Error(e).left()
     }
 
+inline fun <T> tryCatchSuspend(func: () -> T): Either<Error, T> =
+    try {
+        func().right()
+    } catch (e: Throwable) {
+        Error(e).left()
+    }
+
 fun <T> tryCatchFlatMap(func: () -> Either<Error, T>): Either<Error, T> =
     try {
         func()
