@@ -5,6 +5,7 @@ import arrow.core.left
 import com.example.events.IOutboundEvent
 import com.example.func.sendEvent
 import com.example.func.toEither
+import com.example.func.tryCatchFlatMap
 import com.example.pojos.RoomState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -17,10 +18,14 @@ suspend inline fun <T> AtomicReference<ServerState>.mutateAtomically(
     crossinline mutateF: suspend (ServerState) -> Either<Error, T>
 ): Either<Error, T> {
     var result: Either<Error, T> = Error("Failed to modify atomically").left()
-    coroutineScope {
-        launch {
-            result = mutateF(this@mutateAtomically.get())
+    try {
+        coroutineScope {
+            launch {
+                result = mutateF(this@mutateAtomically.get())
+            }
         }
+    } catch (e: Exception) {
+        result = Error("Failed to modify atomically: ${e.message}").left()
     }
     return result
 }

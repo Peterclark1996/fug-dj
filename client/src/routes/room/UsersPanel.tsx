@@ -6,7 +6,7 @@ const UsersPanel = ({ connectedUsers }: UsersPanelProps) => {
     return (
         <div className="flex flex-col">
             {connectedUsers.map(user => (
-                <span>{user}</span>
+                <span key={user}>{user}</span>
             ))}
         </div>
     )

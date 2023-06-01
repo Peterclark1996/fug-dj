@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from "react"
 import { EventFromServer, EventFromServerType } from "./EventFromServer"
 import { EventToServer } from "./EventToServer"
+import { useParams } from "react-router-dom"
 
 const getSocketUrl = () => {
     if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
@@ -23,20 +24,15 @@ const WebSocketContext = createContext<{
     on: (event: EventFromServerType, func: (event: EventFromServer) => void) => void
     send: (event: EventToServer) => void
 }>({
-    connect: () => {
-        return undefined
-    },
-    disconnect: () => {
-        return undefined
-    },
+    connect: () => undefined,
+    disconnect: () => undefined,
     on: addListenerToSocket,
-    send: () => {
-        return undefined
-    }
+    send: () => undefined
 })
 
 const onEventReceived = (messageEvent: MessageEvent<EventFromServer>) => {
     const event: EventFromServer = JSON.parse(messageEvent.data.toString())
+
     const listener = eventListeners[event.type]
 
     if (listener != undefined) listener(event)
@@ -120,9 +116,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         [connection, hasFailedToConnect]
     )
 
+    const { roomId } = useParams()
+
     useEffect(() => {
-        connectToSocket(getSocketUrl())
-    }, [connectToSocket])
+        connectToSocket(`${getSocketUrl()}/${roomId}`)
+    }, [connectToSocket, roomId])
 
     const value = {
         connect: connectToSocket,

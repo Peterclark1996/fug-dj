@@ -30,6 +30,7 @@
     "axios": "^1.4.0",
     "eslint": "^8.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "moment": "^2.29.4",
     "pixi.js": "^6.5.8",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

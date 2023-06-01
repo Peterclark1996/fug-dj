@@ -6,7 +6,7 @@ import HeadInfo from "./HeadInfo"
 import HeadLogo from "./HeadLogo"
 import RoomControl from "./RoomControl"
 import ChatPanel from "./ChatPanel"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import RoomPanel from "../../types/RoomPanel"
 import QueuePanel from "./QueuePanel"
 import UsersPanel from "./UsersPanel"
@@ -15,6 +15,8 @@ import Stage from "./Stage"
 import MainContentControl from "./MainContentControl"
 import MainContentPanel from "../../types/MainContentPanel"
 import MediaLibrary from "./MediaLibrary/MediaLibrary"
+import { useWebSocket } from "../../contexts/socket/WebSocketContext"
+import { EventFromServer, EventFromServer_RoomStateUpdated } from "../../contexts/socket/EventFromServer"
 
 type RoomProps = {
     username: string
@@ -23,13 +25,26 @@ type RoomProps = {
 const Room = ({ username }: RoomProps) => {
     const { roomId } = useParams()
 
+    const [latestRoomState, setLatestRoomState] = useState<RoomStateDto | undefined>()
+
+    const { on } = useWebSocket()
+
+    useEffect(() => {
+        on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
+            const event = data as EventFromServer_RoomStateUpdated
+            setLatestRoomState(event.data)
+        })
+    }, [on])
+
     const roomStateRequest = useApiQuery<RoomStateDto>(`room/${roomId}`)
 
-    const roomState = roomStateRequest.data ?? {
-        name: "Connecting...",
-        connectedUsers: [],
-        queue: []
-    }
+    const roomState = latestRoomState
+        ? latestRoomState
+        : roomStateRequest.data ?? {
+              displayName: "Connecting...",
+              connectedUsers: [],
+              queue: []
+          }
 
     const [selectedRoomPanel, setSelectedRoomPanel] = useState<RoomPanel>("chat")
     const [selectedMainContentPanel, setSelectedMainContentPanel] = useState<MainContentPanel>("stage")
@@ -76,14 +91,14 @@ const Room = ({ username }: RoomProps) => {
                         </div>
                         <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col max-w-xs w-80">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <RoomControl
                                 selectedRoomPanel={selectedRoomPanel}
                                 setSelectedRoomPanel={setSelectedRoomPanel}
                             />
                         </div>
-                        <div className="flex grow bg-slate-600 form-emboss z-10">{getRoomPanel()}</div>
+                        <div className="flex grow bg-slate-600 form-emboss z-10 overflow-auto">{getRoomPanel()}</div>
                     </div>
                 </div>
             </Loading>

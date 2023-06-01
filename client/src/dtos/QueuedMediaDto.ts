@@ -1,7 +1,10 @@
 type QueuedMediaDto = {
+    mediaId: string
     userWhoQueued: string
     timeQueued: string
-    videoId: string
+    displayName: string
+    thumbnailUrl: string
+    lengthInSeconds: number
 }
 
 export default QueuedMediaDto

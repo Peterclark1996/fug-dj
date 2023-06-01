@@ -4,6 +4,7 @@ import SavedMediaDto from "../../../dtos/SavedMediaDto"
 import useApiMutation from "../../../hooks/useApiMutation"
 import Button from "../../../library/Button"
 import Input from "../../../library/Input"
+import { useParams } from "react-router-dom"
 
 type MediaProps = {
     media: SavedMediaDto
@@ -30,9 +31,13 @@ const Media = ({ media, playlistId }: MediaProps) => {
     const removeMediaRequest = useApiMutation("delete", `playlist/${playlistId}/media/${media.mediaId}`)
     const onRemoveClick = () => removeMediaRequest.execute().then(fetchPlaylists)
 
-    const onQueueClick = () => {
-        return
-    }
+    const { roomId } = useParams()
+    const queueMediaRequest = useApiMutation("post", `room/${roomId}/queue`)
+    const onQueueClick = () =>
+        queueMediaRequest.execute({
+            playlistId: playlistId,
+            mediaId: media.mediaId
+        })
 
     return (
         <div className="flex grow mt-2 rounded outline outline-1 outline-slate-800 form-emboss">

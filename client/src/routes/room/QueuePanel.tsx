@@ -1,4 +1,8 @@
 import QueuedMediaDto from "../../dtos/QueuedMediaDto"
+import moment from "moment"
+import classes from "./QueuePanel.module.scss"
+
+const SECONDS_IN_HOUR = 3600
 
 type QueuePanelProps = {
     queue: QueuedMediaDto[]
@@ -6,9 +10,34 @@ type QueuePanelProps = {
 
 const QueuePanel = ({ queue }: QueuePanelProps) => {
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col grow">
             {queue.map(queuedMedia => (
-                <span>{queuedMedia.videoId}</span>
+                <div
+                    key={`${queuedMedia.userWhoQueued}_${queuedMedia.mediaId}`}
+                    className={`${classes.outlinedText} flex flex-col relative rounded mx-2 mt-2 px-3 py-2 form-emboss outline outline-1 outline-slate-900 font-extrabold`}
+                >
+                    <div className="flex items-start mb-1 z-10">
+                        <span className="rounded bg-slate-900/25 px-2">{queuedMedia.displayName}</span>
+                    </div>
+                    <div className="flex grow justify-between z-10">
+                        <span className="rounded bg-slate-900/25 px-2">
+                            <i className="fa-solid fa-user me-2" />
+                            {queuedMedia.userWhoQueued}
+                        </span>
+                        <span className="rounded bg-slate-900/25 px-2">
+                            <i className="fa-solid fa-clock me-2" />
+                            {moment
+                                .utc(queuedMedia.lengthInSeconds * 1000, "seconds")
+                                .format(queuedMedia.lengthInSeconds > SECONDS_IN_HOUR ? "HH:mm:ss" : "mm:ss")}
+                        </span>
+                    </div>
+                    <div
+                        className="absolute bg-cover bg-center rounded inset-0 z-0"
+                        style={{
+                            backgroundImage: `url("${queuedMedia.thumbnailUrl}")`
+                        }}
+                    />
+                </div>
             ))}
         </div>
     )
