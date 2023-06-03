@@ -31,8 +31,9 @@ const Room = ({ username }: RoomProps) => {
     const { roomId } = useParams()
 
     const [latestRoomState, setLatestRoomState] = useState<RoomStateDto | undefined>()
-    const [currentlyPlaying, setCurrentlyPlaying] = useState<QueuedMediaDto | undefined>()
-    const [currentlyPlayingStartTime, setCurrentlyPlayingStartTime] = useState<string | undefined>()
+    const [currentlyPlaying, setCurrentlyPlaying] = useState<
+        { queuedMedia: QueuedMediaDto; timeStarted: string } | undefined
+    >()
 
     const { on } = useWebSocket()
 
@@ -43,8 +44,7 @@ const Room = ({ username }: RoomProps) => {
         })
         on("NEXT_MEDIA_STARTED", (data: EventFromServer) => {
             const event = data as EventFromServer_NextMediaStarted
-            setCurrentlyPlaying(event.data.queuedMedia)
-            setCurrentlyPlayingStartTime(event.data.timeStarted)
+            setCurrentlyPlaying(event.data)
         })
     }, [on])
 
@@ -100,8 +100,8 @@ const Room = ({ username }: RoomProps) => {
                     <div className="flex grow flex-col">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <HeadInfo
-                                currentlyPlaying={currentlyPlaying}
-                                currentlyPlayingStartTime={currentlyPlayingStartTime}
+                                currentlyPlayingMedia={currentlyPlaying?.queuedMedia}
+                                currentlyPlayingStartTime={currentlyPlaying?.timeStarted}
                             />
                         </div>
                         <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>
