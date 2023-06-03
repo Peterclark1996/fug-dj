@@ -1,8 +1,6 @@
 import QueuedMediaDto from "../../dtos/QueuedMediaDto"
-import moment from "moment"
 import classes from "./QueuePanel.module.scss"
-
-const SECONDS_IN_HOUR = 3600
+import { secondsToTimeFormat } from "./helpers"
 
 type QueuePanelProps = {
     queue: QueuedMediaDto[]
@@ -26,9 +24,7 @@ const QueuePanel = ({ queue }: QueuePanelProps) => {
                         </span>
                         <span className="flex items-center rounded bg-slate-900/25 px-2">
                             <i className="fa-solid fa-clock me-2" />
-                            {moment
-                                .utc(queuedMedia.lengthInSeconds * 1000, "seconds")
-                                .format(queuedMedia.lengthInSeconds > SECONDS_IN_HOUR ? "HH:mm:ss" : "mm:ss")}
+                            {secondsToTimeFormat(queuedMedia.lengthInSeconds)}
                         </span>
                     </div>
                     <div

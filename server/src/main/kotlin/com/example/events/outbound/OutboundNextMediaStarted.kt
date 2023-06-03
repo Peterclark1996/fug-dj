@@ -9,9 +9,10 @@ import kotlinx.serialization.Serializable
 data class OutboundNextMediaStarted(
     override val data: NextMediaStarted,
     override val type: OutboundEventType = OutboundEventType.NEXT_MEDIA_STARTED
-): IOutboundEvent<NextMediaStarted>
+) : IOutboundEvent<NextMediaStarted>
 
 @Serializable
 data class NextMediaStarted(
-    val queuedMedia: QueuedMediaDto
+    val queuedMedia: QueuedMediaDto,
+    val timeStarted: String
 )

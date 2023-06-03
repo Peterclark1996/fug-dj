@@ -37,7 +37,9 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
                             roomId,
                             "Virtual Room (Not from DB): $roomId",
                             setOf(thisConnection),
-                            emptySet()
+                            emptySet(),
+                            null,
+                            null
                         )
                     } else {
                         state.rooms[roomId] = RoomState(
@@ -45,6 +47,8 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
                             roomState.displayName,
                             roomState.connectedUsers + thisConnection,
                             roomState.queue,
+                            roomState.currentlyPlayingMedia,
+                            roomState.currentlyPlayingMediaStartedAt
                         )
                     }
 

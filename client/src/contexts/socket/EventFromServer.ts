@@ -11,7 +11,8 @@ export type EventFromServer =
 export type EventFromServer_NextMediaStarted = {
     type: "NEXT_MEDIA_STARTED"
     data: {
-        nextMedia: QueuedMediaDto
+        queuedMedia: QueuedMediaDto
+        timeStarted: string
     }
 }
 

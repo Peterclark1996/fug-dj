@@ -16,7 +16,12 @@ import MainContentControl from "./MainContentControl"
 import MainContentPanel from "../../types/MainContentPanel"
 import MediaLibrary from "./MediaLibrary/MediaLibrary"
 import { useWebSocket } from "../../contexts/socket/WebSocketContext"
-import { EventFromServer, EventFromServer_RoomStateUpdated } from "../../contexts/socket/EventFromServer"
+import {
+    EventFromServer,
+    EventFromServer_NextMediaStarted,
+    EventFromServer_RoomStateUpdated
+} from "../../contexts/socket/EventFromServer"
+import QueuedMediaDto from "../../dtos/QueuedMediaDto"
 
 type RoomProps = {
     username: string
@@ -26,6 +31,8 @@ const Room = ({ username }: RoomProps) => {
     const { roomId } = useParams()
 
     const [latestRoomState, setLatestRoomState] = useState<RoomStateDto | undefined>()
+    const [currentlyPlaying, setCurrentlyPlaying] = useState<QueuedMediaDto | undefined>()
+    const [currentlyPlayingStartTime, setCurrentlyPlayingStartTime] = useState<string | undefined>()
 
     const { on } = useWebSocket()
 
@@ -33,6 +40,11 @@ const Room = ({ username }: RoomProps) => {
         on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
             const event = data as EventFromServer_RoomStateUpdated
             setLatestRoomState(event.data)
+        })
+        on("NEXT_MEDIA_STARTED", (data: EventFromServer) => {
+            const event = data as EventFromServer_NextMediaStarted
+            setCurrentlyPlaying(event.data.queuedMedia)
+            setCurrentlyPlayingStartTime(event.data.timeStarted)
         })
     }, [on])
 
@@ -87,7 +99,10 @@ const Room = ({ username }: RoomProps) => {
                     </div>
                     <div className="flex grow flex-col">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
-                            <HeadInfo />
+                            <HeadInfo
+                                currentlyPlaying={currentlyPlaying}
+                                currentlyPlayingStartTime={currentlyPlayingStartTime}
+                            />
                         </div>
                         <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>
                     </div>
