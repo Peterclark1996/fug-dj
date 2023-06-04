@@ -3,7 +3,6 @@ package com.example.func
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import com.example.NotFoundError
 
 fun <T> tryCatch(func: () -> T): Either<Error, T> =
     try {

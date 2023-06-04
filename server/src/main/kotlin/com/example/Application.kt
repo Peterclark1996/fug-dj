@@ -17,8 +17,6 @@ import java.util.concurrent.atomic.AtomicReference
 private const val MONGO_CONNECTION_STRING_VAR_NAME = "MONGO_CONNECTION_STRING"
 private const val YOUTUBE_API_KEY_VAR_NAME = "YOUTUBE_API_KEY"
 
-const val TEMP_USER_ID = "6472888133a5d88dea146111"
-
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
 }

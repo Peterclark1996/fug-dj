@@ -2,7 +2,6 @@ package com.example.func
 
 import arrow.core.left
 import arrow.core.right
-import com.example.BadRequestError
 import com.example.events.IOutboundEvent
 import com.example.events.InboundEvent
 import io.ktor.websocket.*

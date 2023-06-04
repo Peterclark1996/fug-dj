@@ -4,11 +4,7 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import arrow.core.traverseEither
-import com.example.NotFoundError
-import com.example.func.encode
-import com.example.func.mapToUnit
-import com.example.func.parse
-import com.example.func.tryCatchFlatMap
+import com.example.func.*
 import com.example.pojos.PlaylistDto
 import com.example.pojos.SavedMediaDto
 import com.mongodb.ConnectionString
@@ -19,9 +15,7 @@ import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.UpdateOptions
 import com.mongodb.client.model.Updates
-import kotlinx.serialization.Serializable
 import org.bson.Document
-import org.bson.types.ObjectId
 
 private const val DATABASE_NAME = "fugdj"
 
@@ -48,7 +42,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
             )
             val removeOptions = UpdateOptions().arrayFilters(arrayFilters)
 
-            collection.updateOne(Document("_id", ObjectId(userId)), removeOperation, removeOptions)
+            collection.updateOne(Document("_id", userId), removeOperation, removeOptions)
 
             media.encode().map { mediaAsJson ->
                 val addOperation = Document(
@@ -60,7 +54,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
                 )
                 val addOptions = UpdateOptions().arrayFilters(arrayFilters)
 
-                collection.updateOne(Document("_id", ObjectId(userId)), addOperation, addOptions)
+                collection.updateOne(Document("_id", userId), addOperation, addOptions)
             }.mapToUnit()
         }
     },
@@ -79,7 +73,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
             )
             val removeOptions = UpdateOptions().arrayFilters(arrayFilters)
 
-            val result = collection.updateOne(Document("_id", ObjectId(userId)), removeOperation, removeOptions)
+            val result = collection.updateOne(Document("_id", userId), removeOperation, removeOptions)
 
             if (result.matchedCount == 0L) {
                 NotFoundError("Could not find media with id $mediaId in playlist with id $playlistId for user with id $userId").left()
@@ -93,7 +87,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
             val collection: MongoCollection<Document> = database.getCollection("user_data")
 
             val filter = Filters.and(
-                Filters.eq("_id", ObjectId(userId)),
+                Filters.eq("_id", userId),
                 Filters.eq("playlists.id", playlistId),
                 Filters.eq("playlists.media.mediaId", mediaId)
             )
@@ -114,7 +108,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
         callMongoTryCatch(mongoConnectionString) { database ->
             val collection: MongoCollection<Document> = database.getCollection("user_data")
 
-            val filter = Document("_id", ObjectId(userId))
+            val filter = Document("_id", userId)
             val projection = Document("playlists", 1)
             val result = collection.find(filter).projection(projection).first()
 

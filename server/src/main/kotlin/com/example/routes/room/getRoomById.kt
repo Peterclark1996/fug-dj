@@ -1,8 +1,8 @@
 package com.example.routes.room
 
-import com.example.NotFoundError
+import com.example.func.NotFoundError
+import com.example.func.respondWith
 import com.example.func.toEither
-import com.example.respondWith
 import com.example.state.ServerState
 import io.ktor.server.application.*
 import io.ktor.server.routing.*

@@ -1,12 +1,13 @@
 package com.example.routes.playlist
 
-import com.example.TEMP_USER_ID
+import arrow.core.flatMap
 import com.example.external.mongo.MongoFunctions
-import com.example.respondWith
+import com.example.func.getUserId
+import com.example.func.respondWith
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
 fun Route.getAllPlaylists(mongoFunctions: MongoFunctions) = get {
-    val response = mongoFunctions.getAllPlaylistsF(TEMP_USER_ID)
+    val response = call.getUserId().flatMap { userId -> mongoFunctions.getAllPlaylistsF(userId) }
     call.respondWith(response)
 }
