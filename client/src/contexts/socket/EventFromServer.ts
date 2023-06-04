@@ -1,12 +1,24 @@
 import QueuedMediaDto from "../../dtos/QueuedMediaDto"
 import RoomStateDto from "../../dtos/RoomStateDto"
 
-export type EventFromServerType = "NEXT_MEDIA_STARTED" | "USER_SENT_MESSAGE" | "ROOM_STATE_UPDATED"
+export type EventFromServerType =
+    | "CONNECTION_SUCCESS"
+    | "NEXT_MEDIA_STARTED"
+    | "USER_SENT_MESSAGE"
+    | "ROOM_STATE_UPDATED"
 
 export type EventFromServer =
+    | EventFromServer_ConnectionSuccess
     | EventFromServer_NextMediaStarted
     | EventFromServer_UserSentMessage
     | EventFromServer_RoomStateUpdated
+
+export type EventFromServer_ConnectionSuccess = {
+    type: "CONNECTION_SUCCESS"
+    data: {
+        message: string
+    }
+}
 
 export type EventFromServer_NextMediaStarted = {
     type: "NEXT_MEDIA_STARTED"

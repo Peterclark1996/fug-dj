@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext, ReactNode 
 import { EventFromServer, EventFromServerType } from "./EventFromServer"
 import { EventToServer } from "./EventToServer"
 import { useParams } from "react-router-dom"
+import { useAuth } from "@clerk/clerk-react"
 
 const getSocketUrl = () => {
     if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
@@ -18,20 +19,28 @@ const eventListeners: { [key: string]: (event: EventFromServer) => void } = {}
 const addListenerToSocket = (eventType: EventFromServerType, func: (event: EventFromServer) => void) =>
     (eventListeners[eventType] = func)
 
+type Status = "connecting" | "connected" | "disconnected" | "failed"
+
 const WebSocketContext = createContext<{
+    status: Status
     connect: (socketUrl: string, retriesRemaining?: number) => void
     disconnect: () => void
     on: (event: EventFromServerType, func: (event: EventFromServer) => void) => void
     send: (event: EventToServer) => void
 }>({
+    status: "disconnected",
     connect: () => undefined,
     disconnect: () => undefined,
     on: addListenerToSocket,
     send: () => undefined
 })
 
-const onEventReceived = (messageEvent: MessageEvent<EventFromServer>) => {
+const onEventReceived = (messageEvent: MessageEvent<EventFromServer>, setStatus: (status: Status) => void) => {
     const event: EventFromServer = JSON.parse(messageEvent.data.toString())
+
+    if (event.type === "CONNECTION_SUCCESS") {
+        setStatus("connected")
+    }
 
     const listener = eventListeners[event.type]
 
@@ -46,6 +55,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     const [connection, setConnection] = useState<WebSocket | undefined>()
 
     const [hasFailedToConnect, setHasFailedToConnect] = useState(false)
+    const [status, setStatus] = useState<Status>("connecting")
+
+    const { getToken } = useAuth()
 
     const sendToSocket = useCallback(
         (event: EventToServer) => {
@@ -62,7 +74,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     )
 
     const disconnectFromSocket = () => {
-        console.log("DISCONNECTING")
+        setStatus("disconnected")
+    }
+
+    const onMessage = (messageEvent: MessageEvent<EventFromServer>) => {
+        onEventReceived(messageEvent, setStatus)
     }
 
     const connectToSocket = useCallback(
@@ -79,7 +95,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                 connection !== undefined &&
                 (connection.readyState === WebSocket.CONNECTING || connection.readyState === WebSocket.OPEN)
             ) {
-                connection.onmessage = onEventReceived
+                connection.onmessage = onMessage
                 return
             }
 
@@ -104,7 +120,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                 newConnection.onclose = event => reconnectToSocketOnClose(event.reason)
             }
 
-            newConnection.onmessage = onEventReceived
+            newConnection.onmessage = onMessage
 
             newConnection.onclose = event => reconnectToSocketOnClose(event.reason, retriesRemaining)
 
@@ -119,10 +135,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     const { roomId } = useParams()
 
     useEffect(() => {
-        connectToSocket(`${getSocketUrl()}/${roomId}`)
-    }, [connectToSocket, roomId])
+        setStatus("connecting")
+        getToken().then(token => {
+            connectToSocket(`${getSocketUrl()}/${roomId}?token=${token}`)
+        })
+    }, [connectToSocket, getToken, roomId])
 
     const value = {
+        status: hasFailedToConnect ? "failed" : status,
         connect: connectToSocket,
         disconnect: disconnectFromSocket,
         on: addListenerToSocket,

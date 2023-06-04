@@ -20,8 +20,7 @@ private const val YOUTUBE_API_KEY_VAR_NAME = "YOUTUBE_API_KEY"
 const val TEMP_USER_ID = "6472888133a5d88dea146111"
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
-        .start(wait = true)
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
 }
 
 fun Application.module() {
@@ -36,9 +35,10 @@ fun Application.module() {
     val serverState = AtomicReference(ServerState())
     serverState.get().start()
 
+    configureSecurity()
+
     configureSockets(serverState)
     configureSerialization()
-    configureSecurity()
     configureHTTP()
     configureRouting(serverState, mongoFunctions, youtubeFunctions)
 }

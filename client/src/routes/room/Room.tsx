@@ -33,7 +33,7 @@ const Room = ({ username }: RoomProps) => {
     const [latestRoomState, setLatestRoomState] = useState<RoomStateDto>()
     const [currentlyPlaying, setCurrentlyPlaying] = useState<{ queuedMedia: QueuedMediaDto; timeStarted: string }>()
 
-    const { on } = useWebSocket()
+    const { status, on } = useWebSocket()
 
     useEffect(() => {
         on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
@@ -81,7 +81,7 @@ const Room = ({ username }: RoomProps) => {
 
     return (
         <div className="h-screen w-screen">
-            <Loading isLoading={roomStateRequest.isLoading}>
+            <Loading isLoading={roomStateRequest.isLoading || status == "connecting"}>
                 <div className="flex h-screen text-white">
                     <div className="flex flex-col">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
