@@ -1,21 +1,23 @@
 package com.example
 
 import arrow.core.getOrHandle
-import com.example.func.getEnvVar
 import com.example.external.mongo.buildMongoFunctions
-import com.example.state.ServerState
 import com.example.external.youtube.buildYoutubeFunctions
+import com.example.func.getEnvVar
+import com.example.state.ServerState
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import java.util.concurrent.atomic.AtomicReference
 
 private const val MONGO_CONNECTION_STRING_VAR_NAME = "MONGO_CONNECTION_STRING"
 private const val YOUTUBE_API_KEY_VAR_NAME = "YOUTUBE_API_KEY"
+
+const val TEMP_USER_ID = "6472888133a5d88dea146111"
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)

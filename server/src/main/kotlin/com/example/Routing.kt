@@ -15,6 +15,7 @@ import com.example.routes.playlist.patchMedia
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import java.io.File
@@ -40,16 +41,18 @@ fun Application.configureRouting(
             }
         }
 
-        route("/api") {
-            route("/playlist") {
-                getAllPlaylists(mongoFunctions)
-                postNewMedia(mongoFunctions, youtubeFunctions)
-                deleteMedia(mongoFunctions)
-                patchMedia(mongoFunctions)
-            }
-            route("/room") {
-                getRoomById(serverState)
-                postNewMediaToRoomQueue(mongoFunctions, serverState)
+        authenticate("jwt") {
+            route("/api") {
+                route("/playlist") {
+                    getAllPlaylists(mongoFunctions)
+                    postNewMedia(mongoFunctions, youtubeFunctions)
+                    deleteMedia(mongoFunctions)
+                    patchMedia(mongoFunctions)
+                }
+                route("/room") {
+                    getRoomById(serverState)
+                    postNewMediaToRoomQueue(mongoFunctions, serverState)
+                }
             }
         }
     }

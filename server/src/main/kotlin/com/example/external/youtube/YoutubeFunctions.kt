@@ -15,10 +15,7 @@ data class YoutubeFunctions(
 fun buildYoutubeFunctions(youtubeToken: String) = YoutubeFunctions { videoId ->
     val client = OkHttpClient()
     val url = "https://www.googleapis.com/youtube/v3/videos?id=$videoId&part=snippet,contentDetails&key=$youtubeToken"
-    val request = Request.Builder()
-        .url(url)
-        .get()
-        .build()
+    val request = Request.Builder().url(url).get().build()
 
     val response = client.newCall(request).execute()
     if (!response.isSuccessful) {

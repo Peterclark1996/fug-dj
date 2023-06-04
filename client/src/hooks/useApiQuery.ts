@@ -2,6 +2,7 @@ import axios from "axios"
 import { useCallback, useEffect, useState } from "react"
 import ApiState from "./ApiState"
 import { getApiUrl } from "./constants"
+import { useAuth } from "@clerk/clerk-react"
 
 const useApiQuery = <T>(url: string, canRunImmediately = true) => {
     const sanitisiedUrl = url.startsWith("/") ? url : "/" + url
@@ -28,7 +29,9 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
         setCouldRunImmediately(canRunImmediately)
     }, [canRunImmediately, couldRunImmediately])
 
-    const callApi = useCallback(() => {
+    const { getToken } = useAuth()
+
+    const callApi = useCallback(async () => {
         setState({
             errored: false,
             loading: true,
@@ -37,25 +40,27 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
 
         setLastFetchedUrl(sanitisiedUrl)
 
-        return axios
-            .get(getApiUrl() + sanitisiedUrl)
-            .then(res => {
-                setState({
-                    errored: false,
-                    loading: false,
-                    loaded: true
-                })
+        try {
+            const res = await axios.get(getApiUrl() + sanitisiedUrl, {
+                headers: {
+                    Authorization: `Bearer ${await getToken()}`
+                }
+            })
+            setState({
+                errored: false,
+                loading: false,
+                loaded: true
+            })
 
-                setData(res.data)
+            setData(res.data)
+        } catch {
+            setState({
+                errored: true,
+                loading: false,
+                loaded: true
             })
-            .catch(() => {
-                setState({
-                    errored: true,
-                    loading: false,
-                    loaded: true
-                })
-            })
-    }, [sanitisiedUrl])
+        }
+    }, [getToken, sanitisiedUrl])
 
     useEffect(() => {
         if (lastFetchedUrl === sanitisiedUrl && (state.errored || state.loading || state.loaded)) return

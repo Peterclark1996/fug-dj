@@ -2,6 +2,7 @@ import axios from "axios"
 import { useState } from "react"
 import ApiState from "./ApiState"
 import { getApiUrl } from "./constants"
+import { useAuth } from "@clerk/clerk-react"
 
 const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: string) => {
     const sanitisiedUrl = url.startsWith("/") ? url : "/" + url
@@ -13,7 +14,9 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
         loaded: false
     })
 
-    const execute = (requestBody: unknown = undefined) => {
+    const { getToken } = useAuth()
+
+    const execute = async (requestBody: unknown = undefined) => {
         if (state.loading) return Promise.resolve()
 
         setState({
@@ -22,38 +25,52 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
             loaded: false
         })
 
-        return callAxiosWithMethod(method, getApiUrl() + sanitisiedUrl, requestBody)
-            .then(res => {
-                setState({
-                    errored: false,
-                    loading: false,
-                    loaded: true
-                })
+        try {
+            const res = await callAxiosWithMethod(
+                method,
+                getApiUrl() + sanitisiedUrl,
+                requestBody,
+                (await getToken()) ?? ""
+            )
+            setState({
+                errored: false,
+                loading: false,
+                loaded: true
+            })
 
-                setData(res.data)
+            setData(res.data)
+        } catch {
+            setState({
+                errored: true,
+                loading: false,
+                loaded: true
             })
-            .catch(() => {
-                setState({
-                    errored: true,
-                    loading: false,
-                    loaded: true
-                })
-            })
+        }
     }
 
     return { data, hasErrored: state.errored, isLoading: state.loading, hasLoaded: state.loaded, execute }
 }
 
-const callAxiosWithMethod = (method: "post" | "put" | "patch" | "delete", url: string, requestBody: unknown) => {
+const callAxiosWithMethod = (
+    method: "post" | "put" | "patch" | "delete",
+    url: string,
+    requestBody: unknown,
+    token: string
+) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
     switch (method) {
         case "post":
-            return axios.post(url, requestBody)
+            return axios.post(url, requestBody, config)
         case "put":
-            return axios.put(url, requestBody)
+            return axios.put(url, requestBody, config)
         case "patch":
-            return axios.patch(url, requestBody)
+            return axios.patch(url, requestBody, config)
         case "delete":
-            return axios.delete(url)
+            return axios.delete(url, config)
     }
 }
 

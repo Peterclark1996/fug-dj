@@ -30,10 +30,8 @@ type RoomProps = {
 const Room = ({ username }: RoomProps) => {
     const { roomId } = useParams()
 
-    const [latestRoomState, setLatestRoomState] = useState<RoomStateDto | undefined>()
-    const [currentlyPlaying, setCurrentlyPlaying] = useState<
-        { queuedMedia: QueuedMediaDto; timeStarted: string } | undefined
-    >()
+    const [latestRoomState, setLatestRoomState] = useState<RoomStateDto>()
+    const [currentlyPlaying, setCurrentlyPlaying] = useState<{ queuedMedia: QueuedMediaDto; timeStarted: string }>()
 
     const { on } = useWebSocket()
 
