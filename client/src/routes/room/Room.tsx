@@ -84,9 +84,9 @@ const Room = ({ username }: RoomProps) => {
     }
 
     return (
-        <div className="h-screen w-screen">
+        <div className="h-screen w-screen text-white">
             <Loading isLoading={roomStateRequest.isLoading || status == "connecting"}>
-                <div className="flex h-screen text-white">
+                <div className="flex h-screen">
                     <div className="flex flex-col">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <HeadLogo />
@@ -106,7 +106,7 @@ const Room = ({ username }: RoomProps) => {
                                 currentlyPlayingStartTime={roomState.currentlyPlayingMediaStartedAt}
                             />
                         </div>
-                        <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>
+                        <div className="flex grow bg-slate-700 z-0">{getMainContentPanel()}</div>
                     </div>
                     <div className="flex flex-col max-w-xs w-80">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">

@@ -1,3 +1,4 @@
+import { useClerk } from "@clerk/clerk-react"
 import PanelSelectionButton from "../../library/PanelSelectionButton"
 import MainContentPanel from "../../types/MainContentPanel"
 
@@ -7,6 +8,8 @@ type MainContentControlProps = {
 }
 
 const MainContentControl = ({ selectedMainContentPanel, setSelectedMainContentPanel }: MainContentControlProps) => {
+    const { signOut } = useClerk()
+
     return (
         <div>
             <PanelSelectionButton
@@ -18,6 +21,14 @@ const MainContentControl = ({ selectedMainContentPanel, setSelectedMainContentPa
                 onClick={() =>
                     setSelectedMainContentPanel(selectedMainContentPanel === "library" ? "stage" : "library")
                 }
+            />
+            <PanelSelectionButton
+                icon="fa-arrow-right-from-bracket"
+                backgroundColour=""
+                textColour=""
+                direction="right"
+                selected={false}
+                onClick={signOut}
             />
         </div>
     )

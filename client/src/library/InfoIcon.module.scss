@@ -1,0 +1,33 @@
+$tooltip-color: #1e1d20d0;
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+}
+
+.tooltip .tooltiptext {
+    position: absolute;
+    bottom: 24px;
+    left: -100px;
+    right: -100px;
+    visibility: hidden;
+    z-index: 9999999;
+    background-color: $tooltip-color;
+    backdrop-filter: blur(2px);
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 100px;
+    right: 100px;
+    border-width: 12px;
+    border-style: solid;
+    border-color: $tooltip-color transparent transparent transparent;
+}

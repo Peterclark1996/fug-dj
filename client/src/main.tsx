@@ -8,7 +8,9 @@ import "./global.scss"
 const rootElement = document.getElementById("root")
 render(
     <StrictMode>
-        <App />
+        <div className="default-font">
+            <App />
+        </div>
     </StrictMode>,
     rootElement
 )

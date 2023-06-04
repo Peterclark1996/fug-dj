@@ -17,7 +17,12 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
     const { getToken } = useAuth()
 
     const execute = async (requestBody: unknown = undefined) => {
-        if (state.loading) return Promise.resolve()
+        if (state.loading) {
+            return Promise.resolve({
+                data: undefined,
+                statusCode: 0
+            })
+        }
 
         setState({
             errored: false,
@@ -25,26 +30,23 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
             loaded: false
         })
 
-        try {
-            const res = await callAxiosWithMethod(
-                method,
-                getApiUrl() + sanitisiedUrl,
-                requestBody,
-                (await getToken()) ?? ""
-            )
-            setState({
-                errored: false,
-                loading: false,
-                loaded: true
-            })
+        const res = await callAxiosWithMethod(
+            method,
+            getApiUrl() + sanitisiedUrl,
+            requestBody,
+            (await getToken()) ?? ""
+        )
+        setState({
+            errored: false,
+            loading: false,
+            loaded: true
+        })
 
-            setData(res.data)
-        } catch {
-            setState({
-                errored: true,
-                loading: false,
-                loaded: true
-            })
+        setData(res.data)
+
+        return {
+            data: res.data,
+            statusCode: res.status
         }
     }
 
@@ -60,7 +62,8 @@ const callAxiosWithMethod = (
     const config = {
         headers: {
             Authorization: `Bearer ${token}`
-        }
+        },
+        validateStatus: () => true
     }
     switch (method) {
         case "post":

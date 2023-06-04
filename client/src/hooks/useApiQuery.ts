@@ -9,6 +9,7 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
 
     const [lastFetchedUrl, setLastFetchedUrl] = useState<string>()
     const [data, setData] = useState<T>()
+    const [statusCode, setStatusCode] = useState<number>()
     const [state, setState] = useState<ApiState>({
         errored: false,
         loading: false,
@@ -37,14 +38,15 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
             loading: true,
             loaded: false
         })
-
+        setStatusCode(undefined)
         setLastFetchedUrl(sanitisiedUrl)
 
         try {
             const res = await axios.get(getApiUrl() + sanitisiedUrl, {
                 headers: {
                     Authorization: `Bearer ${await getToken()}`
-                }
+                },
+                validateStatus: () => true
             })
             setState({
                 errored: false,
@@ -52,6 +54,7 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
                 loaded: true
             })
 
+            setStatusCode(res.status)
             setData(res.data)
         } catch {
             setState({
@@ -76,7 +79,7 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
         return callApi()
     }
 
-    return { data, hasErrored: state.errored, isLoading: state.loading, hasLoaded: state.loaded, execute }
+    return { data, hasErrored: state.errored, isLoading: state.loading, hasLoaded: state.loaded, statusCode, execute }
 }
 
 export default useApiQuery

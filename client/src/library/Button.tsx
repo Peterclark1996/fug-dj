@@ -11,8 +11,7 @@ const Button = ({ className = "", icon, text, colour, onClick }: ButtonProps) =>
         <div
             role="button"
             className={`
-                ${className} 
-                ${text ? "" : "w-9"} 
+                ${className} ${text ? "" : "w-9"} 
                 h-9 py-1 px-2 rounded ${colour} form-emboss flex content-center items-center
             `}
             onClick={onClick}

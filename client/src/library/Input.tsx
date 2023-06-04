@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react"
+import classes from "./Input.module.scss"
 
 type InputProps = {
     className?: string
     placeholder?: string
+    invalidMessage?: string
     value: string
     onChange: (value: string) => void
 }
 
-const Input = ({ className = "", placeholder = "", value, onChange }: InputProps) => {
+const Input = ({ className = "", placeholder = "", invalidMessage, value, onChange }: InputProps) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,13 +24,15 @@ const Input = ({ className = "", placeholder = "", value, onChange }: InputProps
     }, [value])
 
     return (
-        <input
-            ref={inputRef}
-            placeholder={placeholder}
-            className={`${className} rounded border-0 px-2 outline-none h-9 text-slate-800 form-deboss`}
-            value={value}
-            onChange={onInputChange}
-        />
+        <div className={`${className} rounded ${invalidMessage ? classes.invalid : ""}`}>
+            <input
+                ref={inputRef}
+                placeholder={placeholder}
+                className={`rounded border-0 px-2 outline-none h-9 text-slate-800 form-deboss`}
+                value={value}
+                onChange={onInputChange}
+            />
+        </div>
     )
 }
 
