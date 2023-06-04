@@ -1,10 +1,10 @@
 package com.example.external.mongo
 
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
-import arrow.core.traverseEither
-import com.example.func.*
+import arrow.core.*
+import com.example.func.NotFoundError
+import com.example.func.encode
+import com.example.func.parse
+import com.example.func.tryCatchFlatMap
 import com.example.pojos.PlaylistDto
 import com.example.pojos.SavedMediaDto
 import com.mongodb.ConnectionString
@@ -44,7 +44,7 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
 
             collection.updateOne(Document("_id", userId), removeOperation, removeOptions)
 
-            media.encode().map { mediaAsJson ->
+            media.encode().flatMap { mediaAsJson ->
                 val addOperation = Document(
                     "\$push",
                     Document(
@@ -54,8 +54,14 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
                 )
                 val addOptions = UpdateOptions().arrayFilters(arrayFilters)
 
-                collection.updateOne(Document("_id", userId), addOperation, addOptions)
-            }.mapToUnit()
+                val result = collection.updateOne(Document("_id", userId), addOperation, addOptions)
+
+                if (result.matchedCount == 0L) {
+                    NotFoundError("Could not find media with id ${media.mediaId} in playlist with id $playlistId for user with id $userId").left()
+                } else {
+                    Unit.right()
+                }
+            }
         }
     },
     deleteMediaF = { userId, playlistId, mediaId ->
