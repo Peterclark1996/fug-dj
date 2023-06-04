@@ -18,7 +18,10 @@ import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.RSAPublicKeySpec
+import java.time.Duration
 import java.util.*
+
+private const val SECONDS_OF_LEEWAY = 5L
 
 @Serializable
 private data class Jwks(val keys: List<JwksKey>)
@@ -51,7 +54,7 @@ fun Application.configureSecurity() {
         val algorithm = Algorithm.RSA256(publicKey, null)
 
         jwt("jwt") {
-            verifier(JWT.require(algorithm).build())
+            verifier(JWT.require(algorithm).acceptLeeway(SECONDS_OF_LEEWAY).build())
             validate { credential ->
                 JWTPrincipal(credential.payload)
             }
