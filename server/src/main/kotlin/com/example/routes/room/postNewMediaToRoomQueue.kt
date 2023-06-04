@@ -70,7 +70,10 @@ private suspend fun updateRoomState(
             val updatedRoom =
                 if (existingRoom.currentlyPlayingMedia == null && existingRoom.queue.isEmpty()) {
                     queuedMediaImmediatelyStarted = true
-                    existingRoom.copy(currentlyPlayingMedia = queuedMedia)
+                    existingRoom.copy(
+                        currentlyPlayingMedia = queuedMedia,
+                        currentlyPlayingMediaStartedAt = utcNow()
+                    )
                 } else {
                     existingRoom.copy(
                         queue = existingRoom.queue.filter { it.userWhoQueued != TEMP_USER_ID }

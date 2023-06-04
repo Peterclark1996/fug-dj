@@ -4,8 +4,8 @@ type RoomStateDto = {
     displayName: string
     connectedUsers: string[]
     queue: QueuedMediaDto[]
-    currentlyPlayingMedia: QueuedMediaDto | null
-    currentlyPlayingMediaStartedAt: string | null
+    currentlyPlayingMedia: QueuedMediaDto | undefined
+    currentlyPlayingMediaStartedAt: string | undefined
 }
 
 export default RoomStateDto

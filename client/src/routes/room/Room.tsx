@@ -21,7 +21,14 @@ import {
     EventFromServer_NextMediaStarted,
     EventFromServer_RoomStateUpdated
 } from "../../contexts/socket/EventFromServer"
-import QueuedMediaDto from "../../dtos/QueuedMediaDto"
+
+const defaultRoomState: RoomStateDto = {
+    displayName: "Connecting...",
+    connectedUsers: [],
+    queue: [],
+    currentlyPlayingMedia: undefined,
+    currentlyPlayingMediaStartedAt: undefined
+}
 
 type RoomProps = {
     username: string
@@ -31,7 +38,6 @@ const Room = ({ username }: RoomProps) => {
     const { roomId } = useParams()
 
     const [latestRoomState, setLatestRoomState] = useState<RoomStateDto>()
-    const [currentlyPlaying, setCurrentlyPlaying] = useState<{ queuedMedia: QueuedMediaDto; timeStarted: string }>()
 
     const { status, on } = useWebSocket()
 
@@ -42,19 +48,17 @@ const Room = ({ username }: RoomProps) => {
         })
         on("NEXT_MEDIA_STARTED", (data: EventFromServer) => {
             const event = data as EventFromServer_NextMediaStarted
-            setCurrentlyPlaying(event.data)
+            setLatestRoomState(currentState => ({
+                ...(currentState ?? defaultRoomState),
+                currentlyPlayingMedia: event.data.queuedMedia,
+                currentlyPlayingMediaStartedAt: event.data.timeStarted
+            }))
         })
     }, [on])
 
     const roomStateRequest = useApiQuery<RoomStateDto>(`room/${roomId}`)
 
-    const roomState = latestRoomState
-        ? latestRoomState
-        : roomStateRequest.data ?? {
-              displayName: "Connecting...",
-              connectedUsers: [],
-              queue: []
-          }
+    const roomState = latestRoomState ? latestRoomState : roomStateRequest.data ?? defaultRoomState
 
     const [selectedRoomPanel, setSelectedRoomPanel] = useState<RoomPanel>("chat")
     const [selectedMainContentPanel, setSelectedMainContentPanel] = useState<MainContentPanel>("stage")
@@ -98,8 +102,8 @@ const Room = ({ username }: RoomProps) => {
                     <div className="flex grow flex-col">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
                             <HeadInfo
-                                currentlyPlayingMedia={currentlyPlaying?.queuedMedia}
-                                currentlyPlayingStartTime={currentlyPlaying?.timeStarted}
+                                currentlyPlayingMedia={roomState.currentlyPlayingMedia}
+                                currentlyPlayingStartTime={roomState.currentlyPlayingMediaStartedAt}
                             />
                         </div>
                         <div className="flex grow bg-slate-700 form-emboss z-0">{getMainContentPanel()}</div>
