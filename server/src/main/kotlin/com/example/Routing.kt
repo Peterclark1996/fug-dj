@@ -8,6 +8,8 @@ import com.example.routes.playlist.patchMedia
 import com.example.routes.playlist.postNewMedia
 import com.example.routes.room.getRoomById
 import com.example.routes.room.postNewMediaToRoomQueue
+import com.example.routes.user.getAuthenticatedUser
+import com.example.routes.user.putAuthenticatedUser
 import com.example.state.ServerState
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -44,6 +46,10 @@ fun Application.configureRouting(
                 route("/room") {
                     getRoomById(serverState)
                     postNewMediaToRoomQueue(mongoFunctions, serverState)
+                }
+                route("/user") {
+                    getAuthenticatedUser(mongoFunctions)
+                    putAuthenticatedUser(mongoFunctions)
                 }
             }
         }

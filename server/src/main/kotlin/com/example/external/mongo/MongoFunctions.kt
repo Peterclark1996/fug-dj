@@ -23,7 +23,9 @@ data class MongoFunctions(
     val createMediaF: (userId: String, playlistId: String, media: SavedMediaDto) -> Either<Error, Unit>,
     val deleteMediaF: (userId: String, playlistId: String, mediaId: String) -> Either<Error, Unit>,
     val updateMediaDisplayNameF: (userId: String, playlistId: String, mediaId: String, displayName: String) -> Either<Error, Unit>,
-    val getAllPlaylistsF: (userId: String) -> Either<Error, List<PlaylistDto>>
+    val getAllPlaylistsF: (userId: String) -> Either<Error, List<PlaylistDto>>,
+    val getUserById: (userId: String) -> Either<Error, MongoUserDataDto>,
+    val upsertUser: (userDto: MongoUserDataDto) -> Either<Error, Unit>,
 )
 
 fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
@@ -120,6 +122,44 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
 
             val playlistDocs = result?.getList("playlists", Document::class.java) ?: emptyList()
             playlistDocs.traverseEither { PlaylistDto.serializer().parse(it) }
+        }
+    },
+    getUserById = { userId ->
+        callMongoTryCatch(mongoConnectionString) { database ->
+            val collection: MongoCollection<Document> = database.getCollection("user_data")
+
+            val filter = Document("_id", userId)
+            val result = collection.find(filter).first()
+
+            result?.let { MongoUserDataDto.serializer().parse(it) }
+                ?: NotFoundError("Could not find user with id $userId").left()
+        }
+    },
+    upsertUser = { userDto ->
+        callMongoTryCatch(mongoConnectionString) { database ->
+            val collection: MongoCollection<Document> = database.getCollection("user_data")
+
+            userDto.encode().flatMap { userJson ->
+                userDto.playlists.traverseEither { it.encode() }.map { playlistJsons ->
+                    val filter = Document("_id", userDto.id)
+                    val options = UpdateOptions().upsert(true)
+
+                    val updateOperation = Document.parse(userJson).append(
+                        "\$push",
+                        Document(
+                            "playlists",
+                            Document(
+                                "\$each",
+                                playlistJsons.map { Document.parse(it) }
+                            )
+                        )
+                    )
+
+                    collection.updateOne(filter, updateOperation, options)
+
+                    Unit
+                }
+            }
         }
     }
 )
