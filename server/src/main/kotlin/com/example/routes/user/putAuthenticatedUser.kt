@@ -10,10 +10,13 @@ import com.example.func.BadRequestError
 import com.example.func.getUserId
 import com.example.func.parse
 import com.example.func.respondWith
+import com.example.pojos.PlaylistDto
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+
+private const val DEFAULT_PLAYLIST_ID = "_default"
 
 @Serializable
 private data class PutAuthenticatedUserDto(
@@ -28,10 +31,14 @@ fun Route.putAuthenticatedUser(mongoFunctions: MongoFunctions) =
                 PutAuthenticatedUserDto.serializer().parse(jsonBody, true).flatMap { dto ->
                     dto.validateDisplayName().flatMap { validatedDto ->
                         mongoFunctions.upsertUser(
+                            userId,
                             MongoUserDataDto(
-                                userId,
                                 validatedDto.displayName,
-                                emptyList()
+                                listOf(
+                                    PlaylistDto(
+                                        id = DEFAULT_PLAYLIST_ID
+                                    )
+                                )
                             )
                         )
                     }

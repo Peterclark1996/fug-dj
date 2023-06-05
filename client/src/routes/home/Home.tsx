@@ -26,7 +26,6 @@ const Home = () => {
     const putUserDataRequest = useApiMutation("put", "user")
     const onCreateUserClick = () =>
         putUserDataRequest.execute({ displayName }).then(result => {
-            console.log("Called finsihed", result)
             if (result.statusCode === 200) {
                 navToDefaultRoom()
             } else if (result.statusCode === 400) {
@@ -40,28 +39,23 @@ const Home = () => {
         <div className="flex bg-slate-700 h-screen w-screen text-white items-center justify-center">
             <Loading isLoading={userDataRequest.isLoading}>
                 <div className="py-2 rounded bg-slate-600 form-emboss outline outline-1 outline-slate-800">
-                    <span className="text-3xl">Welcome to fug dj</span>
+                    <span className="text-3xl mx-2">Welcome to fug dj</span>
                     {userDataRequest.statusCode === 200 ? (
-                        <div className="flex flex-col mt-2">
-                            <Button
-                                className="mb-2"
-                                colour="bg-green-400"
-                                text="Join Room"
-                                onClick={navToDefaultRoom}
-                            />
+                        <div className="flex justify-around m-2">
                             <Button
                                 icon="fa-arrow-right-from-bracket"
                                 colour="bg-slate-400"
                                 text="Logout"
                                 onClick={signOut}
                             />
+                            <Button colour="bg-green-400" text="Join Room" onClick={navToDefaultRoom} />
                         </div>
                     ) : (
                         <div className="flex flex-col items-center mt-2">
                             <div className="flex mb-2">
                                 <div className="flex w-10" />
                                 <Input
-                                    placeholder="Display name"
+                                    placeholder="Pick a display name"
                                     invalidMessage={
                                         shouldShowFormAsInvalid
                                             ? "Display name must be at least 3 characters"

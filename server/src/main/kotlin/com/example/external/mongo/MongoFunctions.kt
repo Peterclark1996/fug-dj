@@ -25,7 +25,7 @@ data class MongoFunctions(
     val updateMediaDisplayNameF: (userId: String, playlistId: String, mediaId: String, displayName: String) -> Either<Error, Unit>,
     val getAllPlaylistsF: (userId: String) -> Either<Error, List<PlaylistDto>>,
     val getUserById: (userId: String) -> Either<Error, MongoUserDataDto>,
-    val upsertUser: (userDto: MongoUserDataDto) -> Either<Error, Unit>,
+    val upsertUser: (userId: String, userDto: MongoUserDataDto) -> Either<Error, Unit>,
 )
 
 fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
@@ -135,30 +135,21 @@ fun buildMongoFunctions(mongoConnectionString: String) = MongoFunctions(
                 ?: NotFoundError("Could not find user with id $userId").left()
         }
     },
-    upsertUser = { userDto ->
+    upsertUser = { userId, userDto ->
         callMongoTryCatch(mongoConnectionString) { database ->
             val collection: MongoCollection<Document> = database.getCollection("user_data")
 
-            userDto.encode().flatMap { userJson ->
-                userDto.playlists.traverseEither { it.encode() }.map { playlistJsons ->
-                    val filter = Document("_id", userDto.id)
-                    val options = UpdateOptions().upsert(true)
+            val filter = Document("_id", userId)
+            val result = collection.find(filter).first()
 
-                    val updateOperation = Document.parse(userJson).append(
-                        "\$push",
-                        Document(
-                            "playlists",
-                            Document(
-                                "\$each",
-                                playlistJsons.map { Document.parse(it) }
-                            )
-                        )
-                    )
+            if (result == null) {
+                userDto.encode().map { userJson ->
+                    val userDocument = Document.parse(userJson).append("_id", userId)
 
-                    collection.updateOne(filter, updateOperation, options)
-
-                    Unit
+                    collection.insertOne(userDocument)
                 }
+            } else {
+                NotImplementedError("Updating user is not implemented yet").left()
             }
         }
     }

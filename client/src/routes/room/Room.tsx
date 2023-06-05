@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import useApiQuery from "../../hooks/useApiQuery"
 import RoomStateDto from "../../dtos/RoomStateDto"
 import Loading from "../../library/Loading"
@@ -21,6 +21,7 @@ import {
     EventFromServer_NextMediaStarted,
     EventFromServer_RoomStateUpdated
 } from "../../contexts/socket/EventFromServer"
+import UserDataDto from "../../dtos/UserDataDto"
 
 const defaultRoomState: RoomStateDto = {
     displayName: "Connecting...",
@@ -56,6 +57,7 @@ const Room = ({ username }: RoomProps) => {
         })
     }, [on])
 
+    const userStateRequest = useApiQuery<UserDataDto>("user")
     const roomStateRequest = useApiQuery<RoomStateDto>(`room/${roomId}`)
 
     const roomState = latestRoomState ? latestRoomState : roomStateRequest.data ?? defaultRoomState
@@ -83,9 +85,15 @@ const Room = ({ username }: RoomProps) => {
         }
     }
 
+    const navigate = useNavigate()
+
+    if (userStateRequest.statusCode === 404) {
+        navigate("/home")
+    }
+
     return (
         <div className="h-screen w-screen text-white">
-            <Loading isLoading={roomStateRequest.isLoading || status == "connecting"}>
+            <Loading isLoading={roomStateRequest.isLoading || userStateRequest.isLoading || status == "connecting"}>
                 <div className="flex h-screen">
                     <div className="flex flex-col">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">

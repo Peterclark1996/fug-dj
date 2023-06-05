@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PlaylistDto(
     val id: String,
-    val displayName: String,
-    val media: List<SavedMediaDto>
+    val displayName: String? = "Untitled playlist",
+    val media: List<SavedMediaDto>? = listOf()
 )
