@@ -11,7 +11,7 @@ const Playlist = ({ playlist }: PlaylistProps) => {
             <span className="me-auto text-2xl">{playlist.displayName}</span>
             <div className="m-2 h-px bg-slate-500" />
             <div className="flex flex-col">
-                {playlist.media.map(media => (
+                {(playlist.media ?? []).map(media => (
                     <Media key={media.mediaId} media={media} playlistId={playlist.id} />
                 ))}
             </div>

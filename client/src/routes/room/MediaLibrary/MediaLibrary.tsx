@@ -24,7 +24,9 @@ const MediaLibrary = ({ onClose }: MediaLibraryProps) => {
             ? playlists
             : playlists.map(playlist => ({
                   ...playlist,
-                  media: playlist.media.filter(media => media.displayName.toLowerCase().includes(search.toLowerCase()))
+                  media: (playlist.media ?? []).filter(media =>
+                      media.displayName.toLowerCase().includes(search.toLowerCase())
+                  )
               }))
 
     return (
