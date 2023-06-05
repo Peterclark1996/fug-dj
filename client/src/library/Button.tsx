@@ -7,7 +7,7 @@ type ButtonProps = {
     icon?: string
     text?: string
     colour: string
-    onClick: () => void | Promise<void>
+    onClick: () => void | Promise<unknown>
 }
 
 const Button = ({ className = "", icon, text, colour, onClick }: ButtonProps) => {
@@ -16,7 +16,7 @@ const Button = ({ className = "", icon, text, colour, onClick }: ButtonProps) =>
     const [isLoading, setIsLoading] = useState(false)
 
     const onButtonClick = () => {
-        const result: void | Promise<void> = onClick()
+        const result: void | Promise<unknown> = onClick()
         if (result instanceof Promise) {
             setIsLoading(true)
             result

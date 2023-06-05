@@ -1,12 +1,14 @@
+import User from "./User"
+
 type UsersPanelProps = {
     connectedUsers: string[]
 }
 
 const UsersPanel = ({ connectedUsers }: UsersPanelProps) => {
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col grow px-4">
             {connectedUsers.map(user => (
-                <span key={user}>{user}</span>
+                <User key={user} username={user} />
             ))}
         </div>
     )

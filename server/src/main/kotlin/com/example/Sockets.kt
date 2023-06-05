@@ -10,7 +10,6 @@ import com.example.pojos.RoomState
 import com.example.state.Connection
 import com.example.state.ServerState
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -38,7 +37,13 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
                 return@webSocket
             }
 
-            val thisConnection = Connection(this)
+            val name = call.parameters["name"]
+            if (name == null) {
+                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No name provided"))
+                return@webSocket
+            }
+
+            val thisConnection = Connection(this, name)
 
             serverState.get().connections += thisConnection
 
