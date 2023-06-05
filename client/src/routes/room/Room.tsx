@@ -92,7 +92,7 @@ const Room = ({ username }: RoomProps) => {
     }
 
     return (
-        <div className="h-screen w-screen text-white">
+        <div className="h-screen w-screen text-white bg-slate-700">
             <Loading isLoading={roomStateRequest.isLoading || userStateRequest.isLoading || status == "connecting"}>
                 <div className="flex h-screen">
                     <div className="flex flex-col">
