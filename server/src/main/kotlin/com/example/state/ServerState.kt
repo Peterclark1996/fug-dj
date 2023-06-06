@@ -1,34 +1,37 @@
 package com.example.state
 
 import arrow.core.Either
-import arrow.core.flatMap
 import arrow.core.right
 import arrow.core.traverseEither
 import com.example.events.IOutboundEvent
-import com.example.func.mapToUnit
-import com.example.func.sendEvent
-import com.example.func.toEither
+import com.example.events.outbound.NextMediaStarted
+import com.example.events.outbound.OutboundNextMediaStarted
+import com.example.events.outbound.OutboundRoomStateUpdated
+import com.example.func.*
 import com.example.pojos.RoomState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.ZonedDateTime
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
-suspend inline fun <reified TEvent : IOutboundEvent<TData>, reified TData> AtomicReference<ServerState>.sendToRoom(
-    roomId: String,
+fun AtomicReference<ServerState>.getRoomById(roomId: String) =
+    this.get().rooms[roomId].toEither("Failed to find room with id: '${roomId}'")
+
+suspend inline fun <reified TEvent : IOutboundEvent<TData>, reified TData> RoomState.sendToConnectedUsers(
     event: TEvent
 ): Either<Error, Unit> =
-    this.get().rooms[roomId].toEither("Failed to find room with id: '${roomId}'").flatMap { room ->
-        room.connectedUsers.traverseEither { connection ->
-            val session = connection.session
-            if (session.closeReason.isActive) {
-                session.sendEvent(event)
-            } else {
-                Unit.right()
-            }
-        }.mapToUnit()
-    }
+    connectedUsers.traverseEither { connection ->
+        val session = connection.session
+        if (session.closeReason.isActive) {
+            session.sendEvent(event)
+        } else {
+            Unit.right()
+        }
+    }.mapToUnit()
 
 data class ServerState(
     var connections: Set<Connection> = Collections.synchronizedSet(LinkedHashSet()),
@@ -40,7 +43,48 @@ data class ServerState(
         isRunning = true
         CoroutineScope(Job()).launch {
             while (isRunning) {
-                // TODO Check currently playing media, if any have ended, broadcast the next media to every room
+                delay(1000)
+
+                val roomsWithFinishedMedia = rooms.values.filter { roomState ->
+                    val media = roomState.currentlyPlayingMedia
+                    val startedAt = roomState.currentlyPlayingMediaStartedAt?.let { isoStringToZonedDateTime(it) }
+
+                    if (media == null || startedAt == null) {
+                        false
+                    } else {
+                        val now = ZonedDateTime.now()
+                        val duration = media.lengthInSeconds
+                        val shouldFinishAt = startedAt + Duration.ofSeconds(duration.toLong())
+
+                        now > shouldFinishAt
+                    }
+                }
+
+                roomsWithFinishedMedia.forEach { roomState ->
+                    val nextInQueue = roomState.queue.maxByOrNull { isoStringToZonedDateTime(it.timeQueued) }
+                    if (nextInQueue == null) {
+                        rooms[roomState.id] = roomState.copy(
+                            currentlyPlayingMedia = null,
+                            currentlyPlayingMediaStartedAt = null
+                        )
+                    } else {
+                        val updatedRoom = roomState.copy(
+                            queue = roomState.queue.filter { it.mediaId != nextInQueue.mediaId }.toSet(),
+                            currentlyPlayingMedia = nextInQueue,
+                            currentlyPlayingMediaStartedAt = utcNow()
+                        )
+                        rooms[roomState.id] = updatedRoom
+                        roomState.sendToConnectedUsers(OutboundRoomStateUpdated(updatedRoom.toDto()))
+                        roomState.sendToConnectedUsers(
+                            OutboundNextMediaStarted(
+                                NextMediaStarted(
+                                    nextInQueue,
+                                    utcNow()
+                                )
+                            )
+                        )
+                    }
+                }
             }
         }
     }

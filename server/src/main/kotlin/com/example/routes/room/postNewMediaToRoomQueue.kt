@@ -11,7 +11,8 @@ import com.example.func.*
 import com.example.pojos.QueuedMediaDto
 import com.example.pojos.SavedMediaDto
 import com.example.state.ServerState
-import com.example.state.sendToRoom
+import com.example.state.getRoomById
+import com.example.state.sendToConnectedUsers
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
@@ -90,16 +91,14 @@ private suspend fun updateRoomState(
     }
 
     return serverState.get().rooms[roomId].toEither().flatMap { updatedRoom ->
-        serverState.sendToRoom(
-            roomId,
-            OutboundRoomStateUpdated(updatedRoom.toDto())
-        )
+        serverState.getRoomById(roomId).flatMap { roomState ->
+            roomState.sendToConnectedUsers(OutboundRoomStateUpdated(updatedRoom.toDto()))
+        }
     }.flatMap {
         if (queuedMediaImmediatelyStarted) {
-            serverState.sendToRoom(
-                roomId,
-                OutboundNextMediaStarted(NextMediaStarted(queuedMedia, utcNow()))
-            )
+            serverState.getRoomById(roomId).flatMap { roomState ->
+                roomState.sendToConnectedUsers(OutboundNextMediaStarted(NextMediaStarted(queuedMedia, utcNow())))
+            }
         } else {
             Unit.right()
         }
