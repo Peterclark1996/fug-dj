@@ -42,10 +42,12 @@ const useApiMutation = <T>(method: "post" | "put" | "patch" | "delete", url: str
             loaded: true
         })
 
-        setData(res.data)
+        const dataSafe = res.status === 200 ? res.data : undefined
+
+        setData(dataSafe)
 
         return {
-            data: res.data,
+            data: dataSafe,
             statusCode: res.status
         }
     }

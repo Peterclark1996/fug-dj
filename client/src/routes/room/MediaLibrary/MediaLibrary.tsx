@@ -5,6 +5,7 @@ import useApiMutation from "../../../hooks/useApiMutation"
 import Playlist from "./Playlist"
 import useApiQuery from "../../../hooks/useApiQuery"
 import PlaylistDto from "../../../dtos/PlaylistDto"
+import Loading from "../../../library/Loading"
 
 type MediaLibraryProps = {
     onClose: () => void
@@ -33,18 +34,31 @@ const MediaLibrary = ({ onClose }: MediaLibraryProps) => {
 
     return (
         <div className="flex flex-col grow m-3">
-            <div className="flex items-center mb-2 p-2 rounded bg-slate-600 form-emboss outline outline-1 outline-slate-800">
-                <span className="text-3xl">Media Library</span>
-                <Input className="ms-2" placeholder="Quick Search" value={search} onChange={setSearch} />
-                <Input className="ms-2" placeholder="Add Video From URL" value={mediaToAdd} onChange={setMediaToAdd} />
-                <Button className="ms-2" icon="fa-plus" text="Add" colour="bg-green-400" onClick={onAddClick} />
-                <Button className="ms-auto" icon="fa-times" colour="bg-slate-400" onClick={onClose} />
-            </div>
-            <div>
-                {playlistsToShow.map(playlist => (
-                    <Playlist key={playlist.id} playlist={playlist} onMediaUpdated={userPlaylistsRequest.execute} />
-                ))}
-            </div>
+            <Loading isLoading={userPlaylistsRequest.isLoading}>
+                <>
+                    <div className="flex items-center mb-2 p-2 rounded bg-slate-600 form-emboss outline outline-1 outline-slate-800">
+                        <span className="text-3xl">Media Library</span>
+                        <Input className="ms-2" placeholder="Quick Search" value={search} onChange={setSearch} />
+                        <Input
+                            className="ms-2"
+                            placeholder="Add Video From URL"
+                            value={mediaToAdd}
+                            onChange={setMediaToAdd}
+                        />
+                        <Button className="ms-2" icon="fa-plus" text="Add" colour="bg-green-400" onClick={onAddClick} />
+                        <Button className="ms-auto" icon="fa-times" colour="bg-slate-400" onClick={onClose} />
+                    </div>
+                    <div>
+                        {playlistsToShow.map(playlist => (
+                            <Playlist
+                                key={playlist.id}
+                                playlist={playlist}
+                                onMediaUpdated={userPlaylistsRequest.execute}
+                            />
+                        ))}
+                    </div>
+                </>
+            </Loading>
         </div>
     )
 }

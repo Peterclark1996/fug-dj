@@ -55,7 +55,9 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
             })
 
             setStatusCode(res.status)
-            setData(res.data)
+            if (res.status === 200) {
+                setData(res.data)
+            }
         } catch {
             setState({
                 errored: true,
