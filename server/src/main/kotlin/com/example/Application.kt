@@ -35,7 +35,7 @@ fun Application.module() {
 
     configureSecurity()
 
-    configureSockets(serverState)
+    configureSockets(serverState, mongoFunctions)
     configureSerialization()
     configureHTTP()
     configureRouting(serverState, mongoFunctions, youtubeFunctions)

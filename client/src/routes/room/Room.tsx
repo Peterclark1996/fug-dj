@@ -58,7 +58,7 @@ const Room = ({ username }: RoomProps) => {
     }, [on])
 
     const userStateRequest = useApiQuery<UserDataDto>("user")
-    const roomStateRequest = useApiQuery<RoomStateDto>(`room/${roomId}`)
+    const roomStateRequest = useApiQuery<RoomStateDto>(`room/${roomId}`, status === "connected")
 
     const roomState = latestRoomState ? latestRoomState : roomStateRequest.data ?? defaultRoomState
 
@@ -87,7 +87,7 @@ const Room = ({ username }: RoomProps) => {
 
     const navigate = useNavigate()
 
-    if (userStateRequest.statusCode === 404) {
+    if (userStateRequest.statusCode === 404 || roomStateRequest.statusCode === 404) {
         navigate("/home")
     }
 

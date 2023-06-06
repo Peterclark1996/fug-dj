@@ -1,9 +1,12 @@
 package com.example
 
 import arrow.core.flatMap
+import arrow.core.getOrHandle
+import com.auth0.jwt.JWT
 import com.example.events.deserializeEventData
 import com.example.events.outbound.ConnectionSuccess
 import com.example.events.outbound.OutboundConnectionSuccess
+import com.example.external.mongo.MongoFunctions
 import com.example.func.parseStringToEvent
 import com.example.func.sendEvent
 import com.example.pojos.RoomState
@@ -16,7 +19,7 @@ import io.ktor.websocket.*
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicReference
 
-fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
+fun Application.configureSockets(serverState: AtomicReference<ServerState>, mongoFunctions: MongoFunctions) {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)
@@ -37,9 +40,13 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>) {
                 return@webSocket
             }
 
-            val name = call.parameters["name"]
-            if (name == null) {
-                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No name provided"))
+            val userId = JWT.decode(token).getClaim("sub")?.asString()
+            if (userId == null) {
+                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
+                return@webSocket
+            }
+            val name = mongoFunctions.getUserById(userId).map { it.displayName }.getOrHandle {
+                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
                 return@webSocket
             }
 
