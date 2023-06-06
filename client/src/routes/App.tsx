@@ -1,15 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { WebSocketProvider } from "../contexts/socket/WebSocketContext"
+import { WebSocketProvider } from "../contexts/WebSocketContext"
 import Room from "./room/Room"
-import { UserMediaProvider } from "../contexts/UserMediaContext"
 import { ClerkProvider, RedirectToSignIn, SignIn, SignUp, SignedIn, SignedOut } from "@clerk/clerk-react"
 import Home from "./home/Home"
 
 const clerkPubKey = import.meta.env.VITE_REACT_APP_CLERK_PUBLISHABLE_KEY
 
 const App = () => {
-    const username = "Pete" // TODO: get username from api
-
     return (
         <ClerkProvider publishableKey={clerkPubKey}>
             <BrowserRouter>
@@ -34,11 +31,9 @@ const App = () => {
                         element={
                             <>
                                 <SignedIn>
-                                    <UserMediaProvider>
-                                        <WebSocketProvider>
-                                            <Room username={username} />
-                                        </WebSocketProvider>
-                                    </UserMediaProvider>
+                                    <WebSocketProvider>
+                                        <Room />
+                                    </WebSocketProvider>
                                 </SignedIn>
                                 <SignedOut>
                                     <RedirectToSignIn />

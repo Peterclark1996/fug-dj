@@ -2,22 +2,24 @@ import { useState } from "react"
 import Input from "../../../library/Input"
 import Button from "../../../library/Button"
 import useApiMutation from "../../../hooks/useApiMutation"
-import { useUserMedia } from "../../../contexts/UserMediaContext"
 import Playlist from "./Playlist"
+import useApiQuery from "../../../hooks/useApiQuery"
+import PlaylistDto from "../../../dtos/PlaylistDto"
 
 type MediaLibraryProps = {
     onClose: () => void
 }
 
 const MediaLibrary = ({ onClose }: MediaLibraryProps) => {
-    const { playlists, fetchPlaylists } = useUserMedia()
-
     const [search, setSearch] = useState<string>("")
     const [mediaToAdd, setMediaToAdd] = useState<string>("")
 
     const addNewMediaRequest = useApiMutation("post", "playlist/_default/media")
 
-    const onAddClick = () => addNewMediaRequest.execute({ url: mediaToAdd }).then(fetchPlaylists)
+    const userPlaylistsRequest = useApiQuery<PlaylistDto[]>(`playlist`)
+    const playlists = userPlaylistsRequest.data ?? []
+
+    const onAddClick = () => addNewMediaRequest.execute({ url: mediaToAdd }).then(userPlaylistsRequest.execute)
 
     const playlistsToShow =
         search === ""
@@ -40,7 +42,7 @@ const MediaLibrary = ({ onClose }: MediaLibraryProps) => {
             </div>
             <div>
                 {playlistsToShow.map(playlist => (
-                    <Playlist key={playlist.id} playlist={playlist} />
+                    <Playlist key={playlist.id} playlist={playlist} onMediaUpdated={userPlaylistsRequest.execute} />
                 ))}
             </div>
         </div>

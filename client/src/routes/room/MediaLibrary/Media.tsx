@@ -1,19 +1,18 @@
 import { useState } from "react"
-import { useUserMedia } from "../../../contexts/UserMediaContext"
 import SavedMediaDto from "../../../dtos/SavedMediaDto"
 import useApiMutation from "../../../hooks/useApiMutation"
 import Button from "../../../library/Button"
 import Input from "../../../library/Input"
 import { useParams } from "react-router-dom"
+import { secondsToTimeFormat } from "../helpers"
 
 type MediaProps = {
     media: SavedMediaDto
     playlistId: string
+    onMediaUpdated: () => void
 }
 
-const Media = ({ media, playlistId }: MediaProps) => {
-    const { fetchPlaylists } = useUserMedia()
-
+const Media = ({ media, playlistId, onMediaUpdated }: MediaProps) => {
     const [isEditingName, setIsEditingName] = useState<boolean>(false)
     const [updatedName, setUpdatedName] = useState<string>(media.displayName)
 
@@ -21,7 +20,7 @@ const Media = ({ media, playlistId }: MediaProps) => {
     const onConfirmUpdateClick = () =>
         updateMediaRequest
             .execute({ displayName: updatedName })
-            .then(fetchPlaylists)
+            .then(onMediaUpdated)
             .then(() => setIsEditingName(false))
     const onCancelUpdateClick = () => {
         setUpdatedName(media.displayName)
@@ -29,7 +28,7 @@ const Media = ({ media, playlistId }: MediaProps) => {
     }
 
     const removeMediaRequest = useApiMutation("delete", `playlist/${playlistId}/media/${media.mediaId}`)
-    const onRemoveClick = () => removeMediaRequest.execute().then(fetchPlaylists)
+    const onRemoveClick = () => removeMediaRequest.execute().then(onMediaUpdated)
 
     const { roomId } = useParams()
     const queueMediaRequest = useApiMutation("post", `room/${roomId}/queue`)
@@ -40,11 +39,12 @@ const Media = ({ media, playlistId }: MediaProps) => {
         })
 
     return (
-        <div className="flex grow mt-2 rounded outline outline-1 outline-slate-800 form-emboss">
+        <div className="flex grow items-center mt-2 rounded outline outline-1 outline-slate-800 form-emboss">
             <div className="cursor-move h-100 px-3 py-2 rounded outline outline-1 outline-slate-800">
                 <i className="fa-solid fa-grip-lines fa-xl" />
             </div>
-            <div className="flex grow items-center p-1">
+            <span className="ms-2">{secondsToTimeFormat(media.lengthInSeconds)}</span>
+            <div className="flex grow items-center py-1 pe-1">
                 {isEditingName ? (
                     <>
                         <Input className="ms-2" value={updatedName} onChange={setUpdatedName} />

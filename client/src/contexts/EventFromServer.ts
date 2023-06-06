@@ -1,5 +1,5 @@
-import QueuedMediaDto from "../../dtos/QueuedMediaDto"
-import RoomStateDto from "../../dtos/RoomStateDto"
+import QueuedMediaDto from "../dtos/QueuedMediaDto"
+import RoomStateDto from "../dtos/RoomStateDto"
 
 export type EventFromServerType =
     | "CONNECTION_SUCCESS"

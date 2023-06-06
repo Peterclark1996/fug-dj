@@ -15,12 +15,12 @@ import Stage from "./Stage"
 import MainContentControl from "./MainContentControl"
 import MainContentPanel from "../../types/MainContentPanel"
 import MediaLibrary from "./MediaLibrary/MediaLibrary"
-import { useWebSocket } from "../../contexts/socket/WebSocketContext"
+import { useWebSocket } from "../../contexts/WebSocketContext"
 import {
     EventFromServer,
     EventFromServer_NextMediaStarted,
     EventFromServer_RoomStateUpdated
-} from "../../contexts/socket/EventFromServer"
+} from "../../contexts/EventFromServer"
 import UserDataDto from "../../dtos/UserDataDto"
 
 const defaultRoomState: RoomStateDto = {
@@ -31,11 +31,7 @@ const defaultRoomState: RoomStateDto = {
     currentlyPlayingMediaStartedAt: undefined
 }
 
-type RoomProps = {
-    username: string
-}
-
-const Room = ({ username }: RoomProps) => {
+const Room = () => {
     const { roomId } = useParams()
 
     const [latestRoomState, setLatestRoomState] = useState<RoomStateDto>()
@@ -79,7 +75,7 @@ const Room = ({ username }: RoomProps) => {
     const getMainContentPanel = () => {
         switch (selectedMainContentPanel) {
             case "stage":
-                return <Stage username={username} />
+                return <Stage currentlyPlayingMedia={roomState.currentlyPlayingMedia} />
             case "library":
                 return <MediaLibrary onClose={() => setSelectedMainContentPanel("stage")} />
         }

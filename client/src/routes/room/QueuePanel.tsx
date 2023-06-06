@@ -9,6 +9,9 @@ type QueuePanelProps = {
 const QueuePanel = ({ queue }: QueuePanelProps) => {
     return (
         <div className="flex flex-col grow overflow-hidden">
+            {queue.length === 0 && (
+                <span className="mt-4 text-xl text-slate-900/50 italic select-none">Queue is empty</span>
+            )}
             {queue.map(queuedMedia => (
                 <div
                     key={`${queuedMedia.userWhoQueued}_${queuedMedia.mediaId}`}
