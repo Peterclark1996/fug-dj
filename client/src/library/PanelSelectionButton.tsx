@@ -21,7 +21,11 @@ const PanelSelectionButton = ({
             className={`flex ${direction === "down" ? "flex-col" : ""} grow items-stretch bg-slate-600`}
             onClick={onClick}
         >
-            <i className={`flex grow w-50% h-50% p-3 ${selected ? textColour : "text-slate-800"} fa-solid ${icon}`} />
+            <i
+                className={`flex grow w-50% h-50% px-3 ${direction === "down" ? "py-3" : "py-4"} ${
+                    selected ? textColour : "text-slate-800"
+                } fa-solid ${icon}`}
+            />
             <div
                 className={`${direction === "down" ? "h-1" : "w-1"} flex ${
                     selected ? backgroundColour : "bg-slate-800"

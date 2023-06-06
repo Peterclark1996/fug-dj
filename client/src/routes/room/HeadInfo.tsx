@@ -33,10 +33,7 @@ const HeadInfo = ({ currentlyPlayingMedia, currentlyPlayingStartTime }: HeadProp
         <div className="flex grow">
             {currentlyPlayingMedia && (
                 <>
-                    <img
-                        className="rounded outline outline-1 outline-slate-900 me-4"
-                        src={currentlyPlayingMedia.thumbnailUrl}
-                    />
+                    <img className="border-1 border-slate-900" src={currentlyPlayingMedia.thumbnailUrl} />
                     <div className="flex grow flex-col">
                         <span className="flex grow items-center mx-auto">{currentlyPlayingMedia.displayName}</span>
                         <div className="flex h-1 bg-slate-400">
