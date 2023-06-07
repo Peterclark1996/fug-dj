@@ -8,7 +8,7 @@ import RoomControl from "./RoomControl"
 import ChatPanel from "./ChatPanel"
 import { useEffect, useState } from "react"
 import RoomPanel from "../../types/RoomPanel"
-import QueuePanel from "./QueuePanel"
+import QueuePanel from "./QueuePanel/QueuePanel"
 import UsersPanel from "./UserPanel/UsersPanel"
 import RoomList from "./RoomList"
 import Stage from "./Stage"
@@ -22,6 +22,8 @@ import {
     EventFromServer_RoomStateUpdated
 } from "../../contexts/EventFromServer"
 import UserDataDto from "../../dtos/UserDataDto"
+import QueuedMediaDto from "../../dtos/QueuedMediaDto"
+import useApiMutation from "../../hooks/useApiMutation"
 
 const defaultRoomState: RoomStateDto = {
     displayName: "Connecting...",
@@ -61,12 +63,33 @@ const Room = () => {
     const [selectedRoomPanel, setSelectedRoomPanel] = useState<RoomPanel>("chat")
     const [selectedMainContentPanel, setSelectedMainContentPanel] = useState<MainContentPanel>("stage")
 
+    const [mediaQueue, setMediaQueue] = useState<QueuedMediaDto[]>([])
+
+    const queueMediaRequest = useApiMutation("post", `room/${roomId}/queue`)
+    const addMediaToQueue = (media: QueuedMediaDto, playlistId: string) => {
+        if (mediaQueue.length === 0) {
+            queueMediaRequest.execute({
+                playlistId: playlistId,
+                mediaId: media.mediaId
+            })
+        }
+        setMediaQueue(currentQueue => [...currentQueue, media])
+    }
+    const removeMediaFromQueue = (mediaId: string) =>
+        setMediaQueue(currentQueue => currentQueue.filter(media => media.mediaId !== mediaId))
+
     const getRoomPanel = () => {
         switch (selectedRoomPanel) {
             case "chat":
                 return <ChatPanel />
             case "queue":
-                return <QueuePanel queue={roomState.queue} />
+                return (
+                    <QueuePanel
+                        roomQueue={roomState.queue}
+                        userQueue={mediaQueue}
+                        removeMediaFromQueue={removeMediaFromQueue}
+                    />
+                )
             case "users":
                 return <UsersPanel connectedUsers={roomState.connectedUsers} />
         }
@@ -77,7 +100,13 @@ const Room = () => {
             case "stage":
                 return <Stage currentlyPlayingMedia={roomState.currentlyPlayingMedia} />
             case "library":
-                return <MediaLibrary onClose={() => setSelectedMainContentPanel("stage")} />
+                return (
+                    <MediaLibrary
+                        onClose={() => setSelectedMainContentPanel("stage")}
+                        addMediaToQueue={addMediaToQueue}
+                        userId={userStateRequest.data?.userId ?? ""}
+                    />
+                )
         }
     }
 

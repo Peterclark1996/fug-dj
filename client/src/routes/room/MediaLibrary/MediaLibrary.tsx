@@ -6,12 +6,15 @@ import Playlist from "./Playlist"
 import useApiQuery from "../../../hooks/useApiQuery"
 import PlaylistDto from "../../../dtos/PlaylistDto"
 import Loading from "../../../library/Loading"
+import QueuedMediaDto from "../../../dtos/QueuedMediaDto"
 
 type MediaLibraryProps = {
     onClose: () => void
+    addMediaToQueue: (media: QueuedMediaDto, playlistId: string) => void
+    userId: string
 }
 
-const MediaLibrary = ({ onClose }: MediaLibraryProps) => {
+const MediaLibrary = ({ onClose, addMediaToQueue, userId }: MediaLibraryProps) => {
     const [search, setSearch] = useState<string>("")
     const [mediaToAdd, setMediaToAdd] = useState<string>("")
 
@@ -54,6 +57,8 @@ const MediaLibrary = ({ onClose }: MediaLibraryProps) => {
                                 key={playlist.id}
                                 playlist={playlist}
                                 onMediaUpdated={userPlaylistsRequest.execute}
+                                addMediaToQueue={addMediaToQueue}
+                                userId={userId}
                             />
                         ))}
                     </div>

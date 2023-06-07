@@ -3,16 +3,19 @@ import SavedMediaDto from "../../../dtos/SavedMediaDto"
 import useApiMutation from "../../../hooks/useApiMutation"
 import Button from "../../../library/Button"
 import Input from "../../../library/Input"
-import { useParams } from "react-router-dom"
 import { secondsToTimeFormat } from "../helpers"
+import QueuedMediaDto from "../../../dtos/QueuedMediaDto"
+import moment from "moment"
 
 type MediaProps = {
     media: SavedMediaDto
     playlistId: string
     onMediaUpdated: () => void
+    addMediaToQueue: (media: QueuedMediaDto, playlistId: string) => void
+    userId: string
 }
 
-const Media = ({ media, playlistId, onMediaUpdated }: MediaProps) => {
+const Media = ({ media, playlistId, onMediaUpdated, addMediaToQueue, userId }: MediaProps) => {
     const [isEditingName, setIsEditingName] = useState<boolean>(false)
     const [updatedName, setUpdatedName] = useState<string>(media.displayName)
 
@@ -27,16 +30,21 @@ const Media = ({ media, playlistId, onMediaUpdated }: MediaProps) => {
         setIsEditingName(false)
     }
 
+    const onAddToQueueClick = () =>
+        addMediaToQueue(
+            {
+                mediaId: media.mediaId,
+                userWhoQueued: userId,
+                timeQueued: moment().toISOString(),
+                displayName: media.displayName,
+                thumbnailUrl: media.thumbnailUrl,
+                lengthInSeconds: media.lengthInSeconds
+            },
+            playlistId
+        )
+
     const removeMediaRequest = useApiMutation("delete", `playlist/${playlistId}/media/${media.mediaId}`)
     const onRemoveClick = () => removeMediaRequest.execute().then(onMediaUpdated)
-
-    const { roomId } = useParams()
-    const queueMediaRequest = useApiMutation("post", `room/${roomId}/queue`)
-    const onQueueClick = () =>
-        queueMediaRequest.execute({
-            playlistId: playlistId,
-            mediaId: media.mediaId
-        })
 
     return (
         <div className="flex grow items-center mt-2 rounded outline outline-1 outline-slate-800 form-emboss">
@@ -70,7 +78,13 @@ const Media = ({ media, playlistId, onMediaUpdated }: MediaProps) => {
                     </>
                 )}
 
-                <Button className="ms-auto" icon="fa-play" colour="bg-cyan-600" text="Queue" onClick={onQueueClick} />
+                <Button
+                    className="ms-auto"
+                    icon="fa-play"
+                    colour="bg-cyan-600"
+                    text="Queue"
+                    onClick={onAddToQueueClick}
+                />
                 <Button className="ms-2" icon="fa-trash" colour="bg-red-400" text="Remove" onClick={onRemoveClick} />
             </div>
         </div>
