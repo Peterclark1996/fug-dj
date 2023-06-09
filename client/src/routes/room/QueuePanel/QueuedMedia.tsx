@@ -1,19 +1,23 @@
 import QueuedMediaDto from "../../../dtos/QueuedMediaDto"
+import Button from "../../../library/Button"
 import { secondsToTimeFormat } from "../helpers"
 import classes from "./QueuedMedia.module.scss"
 
 type QueuedMediaProps = {
     media: QueuedMediaDto
     onRemove: () => void
+    origin: "server" | "client"
 }
 
-const QueuedMedia = ({ media, onRemove }: QueuedMediaProps) => {
+const QueuedMedia = ({ media, onRemove, origin }: QueuedMediaProps) => {
     return (
         <div
-            className={`${classes.outlinedText} flex flex-col relative rounded mx-2 mt-2 px-3 py-2 form-emboss outline outline-1 outline-slate-900 font-extrabold`}
+            className={`${classes.outlinedText} ${origin === "client" ? "outline-amber-900" : "outline-slate-900"} 
+            flex flex-col relative rounded mx-2 mt-2 p-2 form-emboss outline outline-2  font-extrabold`}
         >
             <div className="flex items-start mb-1 z-10">
                 <span className="rounded bg-slate-900/25 px-2 line-clamp-2">{media.displayName}</span>
+                <Button className="ms-2" icon="fa-times" colour="bg-slate-400" onClick={onRemove} />
             </div>
             <div className="flex grow justify-between z-10">
                 <span className="rounded bg-slate-900/25 px-2 me-1 truncate">

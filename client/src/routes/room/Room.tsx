@@ -24,6 +24,8 @@ import {
 import UserDataDto from "../../dtos/UserDataDto"
 import QueuedMediaDto from "../../dtos/QueuedMediaDto"
 import useApiMutation from "../../hooks/useApiMutation"
+import SavedMediaDto from "../../dtos/SavedMediaDto"
+import moment from "moment"
 
 const defaultRoomState: RoomStateDto = {
     displayName: "Connecting...",
@@ -40,21 +42,6 @@ const Room = () => {
 
     const { status, on } = useWebSocket()
 
-    useEffect(() => {
-        on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
-            const event = data as EventFromServer_RoomStateUpdated
-            setLatestRoomState(event.data)
-        })
-        on("NEXT_MEDIA_STARTED", (data: EventFromServer) => {
-            const event = data as EventFromServer_NextMediaStarted
-            setLatestRoomState(currentState => ({
-                ...(currentState ?? defaultRoomState),
-                currentlyPlayingMedia: event.data.queuedMedia,
-                currentlyPlayingMediaStartedAt: event.data.timeStarted
-            }))
-        })
-    }, [on])
-
     const userStateRequest = useApiQuery<UserDataDto>("user")
     const roomStateRequest = useApiQuery<RoomStateDto>(`room/${roomId}`, status === "connected")
 
@@ -63,20 +50,92 @@ const Room = () => {
     const [selectedRoomPanel, setSelectedRoomPanel] = useState<RoomPanel>("chat")
     const [selectedMainContentPanel, setSelectedMainContentPanel] = useState<MainContentPanel>("stage")
 
-    const [mediaQueue, setMediaQueue] = useState<QueuedMediaDto[]>([])
+    const [mediaQueue, setMediaQueue] = useState<(QueuedMediaDto & { playlistId: string })[]>([])
 
     const queueMediaRequest = useApiMutation("post", `room/${roomId}/queue`)
-    const addMediaToQueue = (media: QueuedMediaDto, playlistId: string) => {
+    const addMediaToQueue = (media: SavedMediaDto, playlistId: string) => {
+        const userId = userStateRequest.data?.userId
+
+        if (!userId) return
+
+        const mediaToQueue = {
+            mediaId: media.mediaId,
+            userWhoQueued: userId,
+            timeQueued: moment().toISOString(),
+            displayName: media.displayName,
+            thumbnailUrl: media.thumbnailUrl,
+            lengthInSeconds: media.lengthInSeconds,
+            playlistId: playlistId
+        }
+
         if (mediaQueue.length === 0) {
             queueMediaRequest.execute({
                 playlistId: playlistId,
-                mediaId: media.mediaId
+                mediaId: mediaToQueue.mediaId
             })
         }
-        setMediaQueue(currentQueue => [...currentQueue, media])
+        setMediaQueue(currentQueue => [...currentQueue, mediaToQueue])
     }
-    const removeMediaFromQueue = (mediaId: string) =>
-        setMediaQueue(currentQueue => currentQueue.filter(media => media.mediaId !== mediaId))
+
+    const unqueueMediaRequest = useApiMutation("delete", `room/${roomId}/queue`)
+    const removeMediaFromQueue = (media: QueuedMediaDto) => {
+        setMediaQueue(currentQueue => {
+            if (currentQueue.length === 0) return []
+
+            const firstInQueue = currentQueue.sort((a, b) => a.timeQueued.localeCompare(b.timeQueued))[0]
+
+            if (firstInQueue.mediaId === media.mediaId && firstInQueue.timeQueued === media.timeQueued) {
+                if (currentQueue.length > 1) {
+                    queueMediaRequest.execute({
+                        playlistId: currentQueue[1].playlistId,
+                        mediaId: currentQueue[1].mediaId
+                    })
+                } else {
+                    unqueueMediaRequest.execute()
+                }
+            }
+
+            return filterQueue(currentQueue, firstInQueue)
+        })
+    }
+
+    useEffect(() => {
+        on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
+            const event = data as EventFromServer_RoomStateUpdated
+            setLatestRoomState(event.data)
+        })
+        on("NEXT_MEDIA_STARTED", (data: EventFromServer) => {
+            const event = data as EventFromServer_NextMediaStarted
+
+            setMediaQueue(currentQueue => {
+                if (mediaQueue.length > 0) {
+                    const firstInQueue = mediaQueue.sort((a, b) => a.timeQueued.localeCompare(b.timeQueued))[0]
+
+                    if (
+                        firstInQueue.mediaId === event.data.queuedMedia.mediaId &&
+                        firstInQueue.userWhoQueued === event.data.queuedMedia.userWhoQueued
+                    ) {
+                        if (currentQueue.length > 1) {
+                            queueMediaRequest.execute({
+                                playlistId: currentQueue[1].playlistId,
+                                mediaId: currentQueue[1].mediaId
+                            })
+                        }
+
+                        return filterQueue(currentQueue, firstInQueue)
+                    }
+                }
+
+                return currentQueue
+            })
+
+            setLatestRoomState(currentState => ({
+                ...(currentState ?? defaultRoomState),
+                currentlyPlayingMedia: event.data.queuedMedia,
+                currentlyPlayingMediaStartedAt: event.data.timeStarted
+            }))
+        })
+    }, [mediaQueue, on, queueMediaRequest])
 
     const getRoomPanel = () => {
         switch (selectedRoomPanel) {
@@ -104,7 +163,6 @@ const Room = () => {
                     <MediaLibrary
                         onClose={() => setSelectedMainContentPanel("stage")}
                         addMediaToQueue={addMediaToQueue}
-                        userId={userStateRequest.data?.userId ?? ""}
                     />
                 )
         }
@@ -157,3 +215,9 @@ const Room = () => {
 }
 
 export default Room
+
+const filterQueue = (
+    queue: (QueuedMediaDto & { playlistId: string })[],
+    media: QueuedMediaDto & { playlistId: string }
+): (QueuedMediaDto & { playlistId: string })[] =>
+    queue.filter(queuedMedia => queuedMedia.mediaId !== media.mediaId || queuedMedia.timeQueued !== media.timeQueued)

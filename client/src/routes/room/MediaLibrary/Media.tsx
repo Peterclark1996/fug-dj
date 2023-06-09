@@ -4,18 +4,15 @@ import useApiMutation from "../../../hooks/useApiMutation"
 import Button from "../../../library/Button"
 import Input from "../../../library/Input"
 import { secondsToTimeFormat } from "../helpers"
-import QueuedMediaDto from "../../../dtos/QueuedMediaDto"
-import moment from "moment"
 
 type MediaProps = {
     media: SavedMediaDto
     playlistId: string
     onMediaUpdated: () => void
-    addMediaToQueue: (media: QueuedMediaDto, playlistId: string) => void
-    userId: string
+    addMediaToQueue: (media: SavedMediaDto, playlistId: string) => void
 }
 
-const Media = ({ media, playlistId, onMediaUpdated, addMediaToQueue, userId }: MediaProps) => {
+const Media = ({ media, playlistId, onMediaUpdated, addMediaToQueue }: MediaProps) => {
     const [isEditingName, setIsEditingName] = useState<boolean>(false)
     const [updatedName, setUpdatedName] = useState<string>(media.displayName)
 
@@ -30,18 +27,7 @@ const Media = ({ media, playlistId, onMediaUpdated, addMediaToQueue, userId }: M
         setIsEditingName(false)
     }
 
-    const onAddToQueueClick = () =>
-        addMediaToQueue(
-            {
-                mediaId: media.mediaId,
-                userWhoQueued: userId,
-                timeQueued: moment().toISOString(),
-                displayName: media.displayName,
-                thumbnailUrl: media.thumbnailUrl,
-                lengthInSeconds: media.lengthInSeconds
-            },
-            playlistId
-        )
+    const onAddToQueueClick = () => addMediaToQueue(media, playlistId)
 
     const removeMediaRequest = useApiMutation("delete", `playlist/${playlistId}/media/${media.mediaId}`)
     const onRemoveClick = () => removeMediaRequest.execute().then(onMediaUpdated)

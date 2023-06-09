@@ -1,15 +1,14 @@
 import PlaylistDto from "../../../dtos/PlaylistDto"
-import QueuedMediaDto from "../../../dtos/QueuedMediaDto"
+import SavedMediaDto from "../../../dtos/SavedMediaDto"
 import Media from "./Media"
 
 type PlaylistProps = {
     playlist: PlaylistDto
     onMediaUpdated: () => void
-    addMediaToQueue: (media: QueuedMediaDto, playlistId: string) => void
-    userId: string
+    addMediaToQueue: (media: SavedMediaDto, playlistId: string) => void
 }
 
-const Playlist = ({ playlist, onMediaUpdated, addMediaToQueue, userId }: PlaylistProps) => {
+const Playlist = ({ playlist, onMediaUpdated, addMediaToQueue }: PlaylistProps) => {
     return (
         <div className="flex flex-col mb-2 p-3 rounded bg-slate-600 form-emboss outline outline-1 outline-slate-800">
             <span className="me-auto text-2xl">{playlist.displayName}</span>
@@ -22,7 +21,6 @@ const Playlist = ({ playlist, onMediaUpdated, addMediaToQueue, userId }: Playlis
                         playlistId={playlist.id}
                         onMediaUpdated={onMediaUpdated}
                         addMediaToQueue={addMediaToQueue}
-                        userId={userId}
                     />
                 ))}
             </div>
