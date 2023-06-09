@@ -12,24 +12,15 @@ const QueuePanel = ({ roomQueue, userQueue, removeMediaFromQueue }: QueuePanelPr
     const orderedUserQueue = userQueue.sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
     const firstInUserQueue = orderedUserQueue.length > 0 ? orderedUserQueue[0] : undefined
 
-    const roomQueueWithLocalTimeQueued = roomQueue.map(queuedMedia => {
-        if (!firstInUserQueue) return queuedMedia
+    const overlayedRoomQueue =
+        firstInUserQueue === undefined ? roomQueue : getQueueWithLocalTimeOverlayed(roomQueue, firstInUserQueue)
 
-        if (
-            queuedMedia.mediaId === firstInUserQueue.mediaId &&
-            queuedMedia.userWhoQueued === firstInUserQueue.userWhoQueued
-        ) {
-            return {
-                ...queuedMedia,
-                timeQueued: firstInUserQueue.timeQueued
-            }
-        }
-
-        return queuedMedia
-    })
+    const orderedRoomQueue = overlayedRoomQueue.sort(
+        (a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf()
+    )
 
     const completeOrderedQueue: (QueuedMediaDto & { origin: "server" | "client" })[] = [
-        ...roomQueueWithLocalTimeQueued.map(m => ({ ...m, origin: "server" as const })),
+        ...orderedRoomQueue.map(m => ({ ...m, origin: "server" as const })),
         ...orderedUserQueue.slice(1).map(m => ({ ...m, origin: "client" as const }))
     ].sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
 
@@ -51,3 +42,32 @@ const QueuePanel = ({ roomQueue, userQueue, removeMediaFromQueue }: QueuePanelPr
 }
 
 export default QueuePanel
+
+const getQueueWithLocalTimeOverlayed = (
+    roomQueue: QueuedMediaDto[],
+    firstInUserQueue: QueuedMediaDto
+): QueuedMediaDto[] => {
+    const doesQueueContainUserMedia = roomQueue.some(
+        queuedMedia =>
+            queuedMedia.mediaId === firstInUserQueue.mediaId &&
+            queuedMedia.userWhoQueued === firstInUserQueue.userWhoQueued
+    )
+
+    if (!doesQueueContainUserMedia) {
+        return [...roomQueue, firstInUserQueue]
+    }
+
+    return roomQueue.map(queuedMedia => {
+        if (
+            queuedMedia.mediaId === firstInUserQueue.mediaId &&
+            queuedMedia.userWhoQueued === firstInUserQueue.userWhoQueued
+        ) {
+            return {
+                ...queuedMedia,
+                timeQueued: firstInUserQueue.timeQueued
+            }
+        }
+
+        return queuedMedia
+    })
+}
