@@ -58,9 +58,10 @@ const ChatPanel = ({ username }: ChatPanelProps) => {
                 <Input
                     className="grow"
                     placeholder="Type a message..."
-                    stretch={true}
+                    mode="stretch"
                     value={messageInputValue}
                     onChange={setMessageInputValue}
+                    onEnterPressed={onSendMessage}
                 />
                 <Button className="ms-2" colour="bg-cyan-600" icon="fa-play" onClick={onSendMessage} />
             </div>
