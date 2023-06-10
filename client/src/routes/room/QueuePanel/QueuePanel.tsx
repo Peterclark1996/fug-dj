@@ -6,6 +6,7 @@ type QueuePanelProps = {
     userId: string
     roomQueue: QueuedMediaDto[]
     userQueue: QueuedMediaDto[]
+    mediaCurrentlyInServerQueue: QueuedMediaDto | undefined
     removeMediaFromServerQueue: () => void
     removeMediaFromLocalQueue: (media: QueuedMediaDto) => void
 }
@@ -14,11 +15,20 @@ const QueuePanel = ({
     userId,
     roomQueue,
     userQueue,
+    mediaCurrentlyInServerQueue,
     removeMediaFromServerQueue,
     removeMediaFromLocalQueue
 }: QueuePanelProps) => {
+    const roomQueueContainsMedia =
+        mediaCurrentlyInServerQueue === undefined ||
+        roomQueue.some(m => m.mediaId === mediaCurrentlyInServerQueue.mediaId)
+
+    const overlayedRoomQueue = roomQueueContainsMedia ? roomQueue : [...roomQueue, mediaCurrentlyInServerQueue]
+
+    const orderedRoomQueue = overlayedRoomQueue.sort(
+        (a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf()
+    )
     const orderedUserQueue = userQueue.sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
-    const orderedRoomQueue = roomQueue.sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
 
     const completeOrderedQueue: (QueuedMediaDto & { origin: "server" | "client" })[] = [
         ...orderedRoomQueue.map(m => ({ ...m, origin: "server" as const })),

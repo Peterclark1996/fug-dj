@@ -56,6 +56,7 @@ const Room = () => {
     const [selectedMainContentPanel, setSelectedMainContentPanel] = useState<MainContentPanel>("stage")
 
     const [mediaQueue, setMediaQueue] = useState<(QueuedMediaDto & { playlistId: string })[]>([])
+    const [mediaCurrentlyInServerQueue, setMediaCurrentlyInServerQueue] = useState<QueuedMediaDto>()
 
     const queueMediaRequest = useApiMutation("post", `room/${roomId}/queue`)
     const addMediaToQueue = (media: SavedMediaDto, playlistId: string) => {
@@ -74,6 +75,7 @@ const Room = () => {
         }
 
         if (mediaQueue.length === 0 && roomState.queue.find(m => m.userWhoQueued === userId) === undefined) {
+            setMediaCurrentlyInServerQueue(mediaToQueue)
             queueMediaRequest.execute({
                 playlistId: playlistId,
                 mediaId: mediaToQueue.mediaId
@@ -88,6 +90,7 @@ const Room = () => {
     const removeMediaFromServerQueue = () => {
         setMediaQueue(currentQueue => {
             if (currentQueue.length > 0) {
+                setMediaCurrentlyInServerQueue(currentQueue[0])
                 queueMediaRequest.execute({
                     playlistId: currentQueue[0].playlistId,
                     mediaId: currentQueue[0].mediaId
@@ -126,6 +129,7 @@ const Room = () => {
                     )[0]
 
                     if (firstInQueue.userWhoQueued === event.data.queuedMedia.userWhoQueued) {
+                        setMediaCurrentlyInServerQueue(currentQueue[0])
                         queueMediaRequest.execute({
                             playlistId: currentQueue[0].playlistId,
                             mediaId: currentQueue[0].mediaId
@@ -169,6 +173,7 @@ const Room = () => {
                         userId={userStateRequest.data?.userId ?? ""}
                         roomQueue={roomState.queue}
                         userQueue={mediaQueue}
+                        mediaCurrentlyInServerQueue={mediaCurrentlyInServerQueue}
                         removeMediaFromServerQueue={removeMediaFromServerQueue}
                         removeMediaFromLocalQueue={removeMediaFromLocalQueue}
                     />
