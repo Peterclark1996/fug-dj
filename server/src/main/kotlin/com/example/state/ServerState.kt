@@ -8,7 +8,6 @@ import com.example.events.outbound.NextMediaStarted
 import com.example.events.outbound.OutboundNextMediaStarted
 import com.example.events.outbound.OutboundRoomStateUpdated
 import com.example.func.*
-import com.example.pojos.RoomState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -63,7 +62,7 @@ data class ServerState(
                 roomsWithFinishedMedia.forEach { roomState ->
                     val nextInQueue = roomState.queue.maxByOrNull { isoStringToZonedDateTime(it.timeQueued) }
                     if (nextInQueue == null) {
-                        rooms[roomState.id] = roomState.copy(
+                        rooms[roomState.roomId] = roomState.copy(
                             currentlyPlayingMedia = null,
                             currentlyPlayingMediaStartedAt = null
                         )
@@ -73,7 +72,7 @@ data class ServerState(
                             currentlyPlayingMedia = nextInQueue,
                             currentlyPlayingMediaStartedAt = utcNow()
                         )
-                        rooms[roomState.id] = updatedRoom
+                        rooms[roomState.roomId] = updatedRoom
                         roomState.sendToConnectedUsers(OutboundRoomStateUpdated(updatedRoom.toDto()))
                         roomState.sendToConnectedUsers(
                             OutboundNextMediaStarted(

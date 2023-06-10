@@ -30,7 +30,7 @@ fun Route.putAuthenticatedUser(mongoFunctions: MongoFunctions) =
             call.getUserId().flatMap { userId ->
                 PutAuthenticatedUserDto.serializer().parse(jsonBody, true).flatMap { dto ->
                     dto.validateDisplayName().flatMap { validatedDto ->
-                        mongoFunctions.upsertUser(
+                        mongoFunctions.upsertUserF(
                             userId,
                             MongoUserDataDto(
                                 validatedDto.displayName,

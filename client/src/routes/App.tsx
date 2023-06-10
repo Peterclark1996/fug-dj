@@ -3,6 +3,7 @@ import { WebSocketProvider } from "../contexts/WebSocketContext"
 import Room from "./room/Room"
 import { ClerkProvider, RedirectToSignIn, SignIn, SignUp, SignedIn, SignedOut } from "@clerk/clerk-react"
 import Home from "./home/Home"
+import CreateUserForm from "./createUser/CreateUserForm"
 
 const clerkPubKey = import.meta.env.VITE_REACT_APP_CLERK_PUBLISHABLE_KEY
 
@@ -19,6 +20,19 @@ const App = () => {
                             <>
                                 <SignedIn>
                                     <Home />
+                                </SignedIn>
+                                <SignedOut>
+                                    <RedirectToSignIn />
+                                </SignedOut>
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/create-user"
+                        element={
+                            <>
+                                <SignedIn>
+                                    <CreateUserForm />
                                 </SignedIn>
                                 <SignedOut>
                                     <RedirectToSignIn />

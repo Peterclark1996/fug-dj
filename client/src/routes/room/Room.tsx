@@ -28,7 +28,10 @@ import SavedMediaDto from "../../dtos/SavedMediaDto"
 import moment from "moment"
 
 const defaultRoomState: RoomStateDto = {
+    roomId: "",
     displayName: "Connecting...",
+    owner: "",
+    visibility: "public",
     connectedUsers: [],
     queue: [],
     currentlyPlayingMedia: undefined,

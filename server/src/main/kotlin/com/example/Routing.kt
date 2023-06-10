@@ -7,6 +7,7 @@ import com.example.routes.playlist.getAllPlaylists
 import com.example.routes.playlist.patchMedia
 import com.example.routes.playlist.postNewMedia
 import com.example.routes.room.deleteMediaFromRoomQueue
+import com.example.routes.room.getAllRooms
 import com.example.routes.room.getRoomById
 import com.example.routes.room.postNewMediaToRoomQueue
 import com.example.routes.user.getAuthenticatedUser
@@ -45,7 +46,8 @@ fun Application.configureRouting(
                     patchMedia(mongoFunctions)
                 }
                 route("/room") {
-                    getRoomById(serverState)
+                    getAllRooms(mongoFunctions, serverState)
+                    getRoomById(mongoFunctions, serverState)
                     postNewMediaToRoomQueue(mongoFunctions, serverState)
                     deleteMediaFromRoomQueue(serverState)
                 }

@@ -1,6 +1,7 @@
 package com.example.routes.room
 
-import com.example.func.NotFoundError
+import arrow.core.flatMap
+import com.example.external.mongo.MongoFunctions
 import com.example.func.respondWith
 import com.example.func.toEither
 import com.example.state.ServerState
@@ -8,12 +9,13 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import java.util.concurrent.atomic.AtomicReference
 
-fun Route.getRoomById(serverState: AtomicReference<ServerState>) = get("/{roomId}") {
-    val roomState = serverState.get().rooms[call.parameters["roomId"]]
-
-    val result = roomState.toEither()
-        .map { it.toDto() }
-        .mapLeft { NotFoundError("Failed to find room with id: '${call.parameters["roomId"]}'") }
+fun Route.getRoomById(mongoFunctions: MongoFunctions, serverState: AtomicReference<ServerState>) = get("/{roomId}") {
+    val result = call.parameters["roomId"].toEither().flatMap { roomId ->
+        mongoFunctions.getRoomByIdF(roomId).map { mongoRoomDto ->
+            val roomState = serverState.get().rooms[call.parameters["roomId"]]
+            roomState?.toDto() ?: mongoRoomDto.toDto()
+        }
+    }
 
     call.respondWith(result)
 }

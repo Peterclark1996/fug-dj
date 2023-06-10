@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
 
 fun Route.getAuthenticatedUser(mongoFunctions: MongoFunctions) = get {
     val response = call.getUserId().flatMap { userId ->
-        mongoFunctions.getUserById(userId).map { userData ->
+        mongoFunctions.getUserByIdF(userId).map { userData ->
             UserDataDto(
                 userId = userId,
                 displayName = userData.displayName,

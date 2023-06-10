@@ -1,7 +1,7 @@
 const RoomList = () => {
     return (
         <div className="flex grow">
-            <span>RoomList</span>
+            <span></span>
         </div>
     )
 }

@@ -9,7 +9,6 @@ import com.example.events.outbound.OutboundConnectionSuccess
 import com.example.external.mongo.MongoFunctions
 import com.example.func.parseStringToEvent
 import com.example.func.sendEvent
-import com.example.pojos.RoomState
 import com.example.state.Connection
 import com.example.state.ServerState
 import io.ktor.server.application.*
@@ -45,7 +44,7 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>, mong
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
                 return@webSocket
             }
-            val name = mongoFunctions.getUserById(userId).map { it.displayName }.getOrHandle {
+            val name = mongoFunctions.getUserByIdF(userId).map { it.displayName }.getOrHandle {
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
                 return@webSocket
             }
@@ -54,27 +53,20 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>, mong
 
             serverState.get().connections += thisConnection
 
+            val roomStateUnsafe = serverState.get().rooms[roomId]
+            val roomStateDefaulted = roomStateUnsafe
+                ?: mongoFunctions.getRoomByIdF(roomId).map { it.initialiseAsState() }.getOrHandle {
+                    close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
+                    return@webSocket
+                }
+
+
             serverState.getAndUpdate { state ->
                 val roomState = state.rooms[roomId]
-
                 if (roomState == null) {
-                    state.rooms[roomId] = RoomState(
-                        roomId,
-                        "Virtual Room (Not from DB): $roomId",
-                        setOf(thisConnection),
-                        emptySet(),
-                        null,
-                        null
-                    )
+                    state.rooms[roomId] = roomStateDefaulted.withAddedConnection(thisConnection)
                 } else {
-                    state.rooms[roomId] = RoomState(
-                        roomState.id,
-                        roomState.displayName,
-                        roomState.connectedUsers + thisConnection,
-                        roomState.queue,
-                        roomState.currentlyPlayingMedia,
-                        roomState.currentlyPlayingMediaStartedAt
-                    )
+                    state.rooms[roomId] = roomState.withAddedConnection(thisConnection)
                 }
 
                 state
