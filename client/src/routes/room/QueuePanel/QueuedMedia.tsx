@@ -7,16 +7,15 @@ type QueuedMediaProps = {
     userId: string
     media: QueuedMediaDto
     onRemove: () => void
-    origin: "server" | "client"
 }
 
-const QueuedMedia = ({ userId, media, onRemove, origin }: QueuedMediaProps) => {
+const QueuedMedia = ({ userId, media, onRemove }: QueuedMediaProps) => {
     const queuedByCurrectUser = media.userWhoQueued === userId
 
     return (
         <div
-            className={`${classes.outlinedText} ${origin === "client" ? "outline-amber-900" : "outline-slate-900"} 
-            flex flex-col relative rounded mx-2 mt-2 p-2 form-emboss outline outline-2  font-extrabold`}
+            className={`${classes.outlinedText} 
+            flex flex-col relative rounded mx-2 mt-2 p-2 form-emboss font-extrabold`}
         >
             <div className="flex items-start mb-1 z-10">
                 <span className="rounded bg-slate-900/25 px-2 line-clamp-2">{media.displayName}</span>

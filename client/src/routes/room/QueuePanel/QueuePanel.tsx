@@ -50,7 +50,6 @@ const QueuePanel = ({
                             ? removeMediaFromServerQueue()
                             : removeMediaFromLocalQueue(queuedMedia)
                     }
-                    origin={queuedMedia.origin}
                 />
             ))}
         </div>
