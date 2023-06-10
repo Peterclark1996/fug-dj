@@ -4,7 +4,9 @@ import arrow.core.flatMap
 import arrow.core.getOrHandle
 import com.auth0.jwt.JWT
 import com.example.events.deserializeEventData
+import com.example.events.outbound.ConnectionFailed
 import com.example.events.outbound.ConnectionSuccess
+import com.example.events.outbound.OutboundConnectionFailed
 import com.example.events.outbound.OutboundConnectionSuccess
 import com.example.external.mongo.MongoFunctions
 import com.example.func.parseStringToEvent
@@ -29,22 +31,26 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>, mong
         webSocket("/socket/room/{roomId}") {
             val token = call.parameters["token"]
             if (token == null) {
+                this.sendEvent(OutboundConnectionFailed(ConnectionFailed("No token provided")))
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No token provided"))
                 return@webSocket
             }
 
             val roomId = call.parameters["roomId"]
             if (roomId == null) {
+                this.sendEvent(OutboundConnectionFailed(ConnectionFailed("No roomId provided")))
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No roomId provided"))
                 return@webSocket
             }
 
             val userId = JWT.decode(token).getClaim("sub")?.asString()
             if (userId == null) {
+                this.sendEvent(OutboundConnectionFailed(ConnectionFailed("Invalid token")))
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
                 return@webSocket
             }
             val name = mongoFunctions.getUserByIdF(userId).map { it.displayName }.getOrHandle {
+                this.sendEvent(OutboundConnectionFailed(ConnectionFailed("Invalid token")))
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
                 return@webSocket
             }
@@ -56,7 +62,8 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>, mong
             val roomStateUnsafe = serverState.get().rooms[roomId]
             val roomStateDefaulted = roomStateUnsafe
                 ?: mongoFunctions.getRoomByIdF(roomId).map { it.initialiseAsState() }.getOrHandle {
-                    close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid token"))
+                    this.sendEvent(OutboundConnectionFailed(ConnectionFailed("Room does not exist")))
+                    close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Room does not exist"))
                     return@webSocket
                 }
 

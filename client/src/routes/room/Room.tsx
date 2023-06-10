@@ -106,7 +106,12 @@ const Room = () => {
 
     const [messages, setMessages] = useState<Message[]>([])
 
+    const navigate = useNavigate()
+
     useEffect(() => {
+        on("CONNECTION_FAILED", () => {
+            navigate("/home")
+        })
         on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
             const event = data as EventFromServer_RoomStateUpdated
             setLatestRoomState(event.data)
@@ -155,7 +160,7 @@ const Room = () => {
                 ...existingMessages
             ])
         })
-    }, [mediaQueue, on, queueMediaRequest])
+    }, [mediaQueue, navigate, on, queueMediaRequest])
 
     const getRoomPanel = () => {
         switch (selectedRoomPanel) {
@@ -189,8 +194,6 @@ const Room = () => {
                 )
         }
     }
-
-    const navigate = useNavigate()
 
     if (userStateRequest.statusCode === 404 || roomStateRequest.statusCode === 404) {
         navigate("/home")

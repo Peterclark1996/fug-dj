@@ -42,6 +42,10 @@ const onEventReceived = (messageEvent: MessageEvent<EventFromServer>, setStatus:
         setStatus("connected")
     }
 
+    if (event.type === "CONNECTION_FAILED") {
+        setStatus("failed")
+    }
+
     const listener = eventListeners[event.type]
 
     if (listener != undefined) listener(event)

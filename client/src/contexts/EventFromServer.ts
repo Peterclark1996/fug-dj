@@ -3,18 +3,27 @@ import RoomStateDto from "../dtos/RoomStateDto"
 
 export type EventFromServerType =
     | "CONNECTION_SUCCESS"
+    | "CONNECTION_FAILED"
     | "NEXT_MEDIA_STARTED"
     | "USER_SENT_MESSAGE"
     | "ROOM_STATE_UPDATED"
 
 export type EventFromServer =
     | EventFromServer_ConnectionSuccess
+    | EventFromServer_ConnectionFailed
     | EventFromServer_NextMediaStarted
     | EventFromServer_UserSentMessage
     | EventFromServer_RoomStateUpdated
 
 export type EventFromServer_ConnectionSuccess = {
     type: "CONNECTION_SUCCESS"
+    data: {
+        message: string
+    }
+}
+
+export type EventFromServer_ConnectionFailed = {
+    type: "CONNECTION_FAILED"
     data: {
         message: string
     }
