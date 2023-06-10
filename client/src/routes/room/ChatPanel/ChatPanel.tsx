@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Input from "../../../library/Input"
 import Button from "../../../library/Button"
 import Chat from "./Chat"

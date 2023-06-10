@@ -87,7 +87,9 @@ const Room = () => {
         setMediaQueue(currentQueue => {
             if (currentQueue.length === 0) return []
 
-            const firstInQueue = currentQueue.sort((a, b) => a.timeQueued.localeCompare(b.timeQueued))[0]
+            const firstInQueue = currentQueue.sort(
+                (a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf()
+            )[0]
 
             if (firstInQueue.mediaId === media.mediaId && firstInQueue.timeQueued === media.timeQueued) {
                 if (currentQueue.length > 1) {
@@ -164,6 +166,7 @@ const Room = () => {
             case "queue":
                 return (
                     <QueuePanel
+                        userId={userStateRequest.data?.userId ?? ""}
                         roomQueue={roomState.queue}
                         userQueue={mediaQueue}
                         removeMediaFromQueue={removeMediaFromQueue}

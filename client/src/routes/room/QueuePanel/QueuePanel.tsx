@@ -3,12 +3,13 @@ import QueuedMediaDto from "../../../dtos/QueuedMediaDto"
 import QueuedMedia from "./QueuedMedia"
 
 type QueuePanelProps = {
+    userId: string
     roomQueue: QueuedMediaDto[]
     userQueue: QueuedMediaDto[]
     removeMediaFromQueue: (media: QueuedMediaDto) => void
 }
 
-const QueuePanel = ({ roomQueue, userQueue, removeMediaFromQueue }: QueuePanelProps) => {
+const QueuePanel = ({ userId, roomQueue, userQueue, removeMediaFromQueue }: QueuePanelProps) => {
     const orderedUserQueue = userQueue.sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
     const firstInUserQueue = orderedUserQueue.length > 0 ? orderedUserQueue[0] : undefined
 
@@ -22,7 +23,7 @@ const QueuePanel = ({ roomQueue, userQueue, removeMediaFromQueue }: QueuePanelPr
     const completeOrderedQueue: (QueuedMediaDto & { origin: "server" | "client" })[] = [
         ...orderedRoomQueue.map(m => ({ ...m, origin: "server" as const })),
         ...orderedUserQueue.slice(1).map(m => ({ ...m, origin: "client" as const }))
-    ].sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
+    ]
 
     return (
         <div className="flex flex-col grow overflow-hidden">
@@ -32,6 +33,7 @@ const QueuePanel = ({ roomQueue, userQueue, removeMediaFromQueue }: QueuePanelPr
             {completeOrderedQueue.map(queuedMedia => (
                 <QueuedMedia
                     key={`${queuedMedia.timeQueued}_${queuedMedia.userWhoQueued}_${queuedMedia.mediaId}`}
+                    userId={userId}
                     media={queuedMedia}
                     onRemove={() => removeMediaFromQueue(queuedMedia)}
                     origin={queuedMedia.origin}

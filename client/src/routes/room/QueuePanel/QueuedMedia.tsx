@@ -4,12 +4,15 @@ import { secondsToTimeFormat } from "../helpers"
 import classes from "./QueuedMedia.module.scss"
 
 type QueuedMediaProps = {
+    userId: string
     media: QueuedMediaDto
     onRemove: () => void
     origin: "server" | "client"
 }
 
-const QueuedMedia = ({ media, onRemove, origin }: QueuedMediaProps) => {
+const QueuedMedia = ({ userId, media, onRemove, origin }: QueuedMediaProps) => {
+    const queuedByCurrectUser = media.userWhoQueued === userId
+
     return (
         <div
             className={`${classes.outlinedText} ${origin === "client" ? "outline-amber-900" : "outline-slate-900"} 
@@ -17,12 +20,14 @@ const QueuedMedia = ({ media, onRemove, origin }: QueuedMediaProps) => {
         >
             <div className="flex items-start mb-1 z-10">
                 <span className="rounded bg-slate-900/25 px-2 line-clamp-2">{media.displayName}</span>
-                <Button className="ms-2" icon="fa-times" colour="bg-slate-400" onClick={onRemove} />
+                {queuedByCurrectUser && (
+                    <Button className="ms-2" icon="fa-times" colour="bg-slate-400" onClick={onRemove} />
+                )}
             </div>
             <div className="flex grow justify-between z-10">
                 <span className="rounded bg-slate-900/25 px-2 me-1 truncate">
                     <i className="fa-solid fa-user me-2" />
-                    {media.userWhoQueued}
+                    {queuedByCurrectUser ? "You" : media.userWhoQueued}
                 </span>
                 <span className="flex items-center rounded bg-slate-900/25 px-2">
                     <i className="fa-solid fa-clock me-2" />
