@@ -6,23 +6,23 @@ type QueuePanelProps = {
     userId: string
     roomQueue: QueuedMediaDto[]
     userQueue: QueuedMediaDto[]
-    removeMediaFromQueue: (media: QueuedMediaDto) => void
+    removeMediaFromServerQueue: () => void
+    removeMediaFromLocalQueue: (media: QueuedMediaDto) => void
 }
 
-const QueuePanel = ({ userId, roomQueue, userQueue, removeMediaFromQueue }: QueuePanelProps) => {
+const QueuePanel = ({
+    userId,
+    roomQueue,
+    userQueue,
+    removeMediaFromServerQueue,
+    removeMediaFromLocalQueue
+}: QueuePanelProps) => {
     const orderedUserQueue = userQueue.sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
-    const firstInUserQueue = orderedUserQueue.length > 0 ? orderedUserQueue[0] : undefined
-
-    const overlayedRoomQueue =
-        firstInUserQueue === undefined ? roomQueue : getQueueWithLocalTimeOverlayed(roomQueue, firstInUserQueue)
-
-    const orderedRoomQueue = overlayedRoomQueue.sort(
-        (a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf()
-    )
+    const orderedRoomQueue = roomQueue.sort((a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf())
 
     const completeOrderedQueue: (QueuedMediaDto & { origin: "server" | "client" })[] = [
         ...orderedRoomQueue.map(m => ({ ...m, origin: "server" as const })),
-        ...orderedUserQueue.slice(1).map(m => ({ ...m, origin: "client" as const }))
+        ...orderedUserQueue.map(m => ({ ...m, origin: "client" as const }))
     ]
 
     return (
@@ -35,7 +35,11 @@ const QueuePanel = ({ userId, roomQueue, userQueue, removeMediaFromQueue }: Queu
                     key={`${queuedMedia.timeQueued}_${queuedMedia.userWhoQueued}_${queuedMedia.mediaId}`}
                     userId={userId}
                     media={queuedMedia}
-                    onRemove={() => removeMediaFromQueue(queuedMedia)}
+                    onRemove={() =>
+                        queuedMedia.origin === "server"
+                            ? removeMediaFromServerQueue()
+                            : removeMediaFromLocalQueue(queuedMedia)
+                    }
                     origin={queuedMedia.origin}
                 />
             ))}
@@ -44,32 +48,3 @@ const QueuePanel = ({ userId, roomQueue, userQueue, removeMediaFromQueue }: Queu
 }
 
 export default QueuePanel
-
-const getQueueWithLocalTimeOverlayed = (
-    roomQueue: QueuedMediaDto[],
-    firstInUserQueue: QueuedMediaDto
-): QueuedMediaDto[] => {
-    const doesQueueContainUserMedia = roomQueue.some(
-        queuedMedia =>
-            queuedMedia.mediaId === firstInUserQueue.mediaId &&
-            queuedMedia.userWhoQueued === firstInUserQueue.userWhoQueued
-    )
-
-    if (!doesQueueContainUserMedia) {
-        return [...roomQueue, firstInUserQueue]
-    }
-
-    return roomQueue.map(queuedMedia => {
-        if (
-            queuedMedia.mediaId === firstInUserQueue.mediaId &&
-            queuedMedia.userWhoQueued === firstInUserQueue.userWhoQueued
-        ) {
-            return {
-                ...queuedMedia,
-                timeQueued: firstInUserQueue.timeQueued
-            }
-        }
-
-        return queuedMedia
-    })
-}

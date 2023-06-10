@@ -73,38 +73,36 @@ const Room = () => {
             playlistId: playlistId
         }
 
-        if (mediaQueue.length === 0) {
+        if (mediaQueue.length === 0 && roomState.queue.find(m => m.userWhoQueued === userId) === undefined) {
             queueMediaRequest.execute({
                 playlistId: playlistId,
                 mediaId: mediaToQueue.mediaId
             })
+        } else {
+            setMediaQueue(currentQueue => [...currentQueue, mediaToQueue])
         }
-        setMediaQueue(currentQueue => [...currentQueue, mediaToQueue])
     }
 
     const unqueueMediaRequest = useApiMutation("delete", `room/${roomId}/queue`)
-    const removeMediaFromQueue = (media: QueuedMediaDto) => {
+
+    const removeMediaFromServerQueue = () => {
         setMediaQueue(currentQueue => {
-            if (currentQueue.length === 0) return []
-
-            const firstInQueue = currentQueue.sort(
-                (a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf()
-            )[0]
-
-            if (firstInQueue.mediaId === media.mediaId && firstInQueue.timeQueued === media.timeQueued) {
-                if (currentQueue.length > 1) {
-                    queueMediaRequest.execute({
-                        playlistId: currentQueue[1].playlistId,
-                        mediaId: currentQueue[1].mediaId
-                    })
-                } else {
-                    unqueueMediaRequest.execute()
-                }
+            if (currentQueue.length > 0) {
+                queueMediaRequest.execute({
+                    playlistId: currentQueue[0].playlistId,
+                    mediaId: currentQueue[0].mediaId
+                })
+                return filterQueue(currentQueue, currentQueue[0])
+            } else {
+                unqueueMediaRequest.execute()
             }
 
-            return filterQueue(currentQueue, firstInQueue)
+            return []
         })
     }
+
+    const removeMediaFromLocalQueue = (media: QueuedMediaDto) =>
+        setMediaQueue(currentQueue => filterQueue(currentQueue, media))
 
     const [messages, setMessages] = useState<Message[]>([])
 
@@ -169,7 +167,8 @@ const Room = () => {
                         userId={userStateRequest.data?.userId ?? ""}
                         roomQueue={roomState.queue}
                         userQueue={mediaQueue}
-                        removeMediaFromQueue={removeMediaFromQueue}
+                        removeMediaFromServerQueue={removeMediaFromServerQueue}
+                        removeMediaFromLocalQueue={removeMediaFromLocalQueue}
                     />
                 )
             case "users":
@@ -241,6 +240,6 @@ export default Room
 
 const filterQueue = (
     queue: (QueuedMediaDto & { playlistId: string })[],
-    media: QueuedMediaDto & { playlistId: string }
+    media: QueuedMediaDto
 ): (QueuedMediaDto & { playlistId: string })[] =>
     queue.filter(queuedMedia => queuedMedia.mediaId !== media.mediaId || queuedMedia.timeQueued !== media.timeQueued)
