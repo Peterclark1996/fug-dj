@@ -2,7 +2,7 @@ import moment from "moment"
 import QueuedMediaDto from "../../dtos/QueuedMediaDto"
 import { secondsToTimeFormat } from "./helpers"
 import { useEffect, useState } from "react"
-import classes from "./HeadInfo.module.scss"
+import Slider from "../../library/Slider"
 
 type HeadProps = {
     currentlyPlayingMedia: QueuedMediaDto | undefined
@@ -36,12 +36,7 @@ const HeadInfo = ({ currentlyPlayingMedia, currentlyPlayingStartTime }: HeadProp
                     <img className="border-1 border-slate-900" src={currentlyPlayingMedia.thumbnailUrl} />
                     <div className="flex grow flex-col">
                         <span className="flex grow items-center mx-auto">{currentlyPlayingMedia.displayName}</span>
-                        <div className="flex h-1 bg-slate-400">
-                            <div className="h-1 bg-green-400" style={{ width: `${percentageComplete}%` }} />
-                            <div className="h-1 relative">
-                                <div className={`absolute bg-slate-300 ${classes.timeLeftIndicator}`} />
-                            </div>
-                        </div>
+                        <Slider value={percentageComplete} />
                     </div>
                     <span className="my-auto mx-4">{timeLeftFormatted}</span>
                 </>
