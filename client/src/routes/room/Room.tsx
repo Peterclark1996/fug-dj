@@ -120,19 +120,16 @@ const Room = () => {
             const event = data as EventFromServer_NextMediaStarted
 
             setMediaQueue(currentQueue => {
-                if (mediaQueue.length > 0) {
-                    const firstInQueue = mediaQueue.sort((a, b) => a.timeQueued.localeCompare(b.timeQueued))[0]
+                if (currentQueue.length > 0) {
+                    const firstInQueue = mediaQueue.sort(
+                        (a, b) => moment(a.timeQueued).valueOf() - moment(b.timeQueued).valueOf()
+                    )[0]
 
-                    if (
-                        firstInQueue.mediaId === event.data.queuedMedia.mediaId &&
-                        firstInQueue.userWhoQueued === event.data.queuedMedia.userWhoQueued
-                    ) {
-                        if (currentQueue.length > 1) {
-                            queueMediaRequest.execute({
-                                playlistId: currentQueue[1].playlistId,
-                                mediaId: currentQueue[1].mediaId
-                            })
-                        }
+                    if (firstInQueue.userWhoQueued === event.data.queuedMedia.userWhoQueued) {
+                        queueMediaRequest.execute({
+                            playlistId: currentQueue[0].playlistId,
+                            mediaId: currentQueue[0].mediaId
+                        })
 
                         return filterQueue(currentQueue, firstInQueue)
                     }
