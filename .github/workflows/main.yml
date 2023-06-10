@@ -1,7 +1,7 @@
 name: Build and deploy server to azure
 
 env:
-  AZURE_WEBAPP_NAME: mmo-as
+  AZURE_WEBAPP_NAME: fugdj-as
 
 on:
   push:
