@@ -19,13 +19,15 @@ import { useWebSocket } from "../../contexts/WebSocketContext"
 import {
     EventFromServer,
     EventFromServer_NextMediaStarted,
-    EventFromServer_RoomStateUpdated
+    EventFromServer_RoomStateUpdated,
+    EventFromServer_UserSentMessage
 } from "../../contexts/EventFromServer"
 import UserDataDto from "../../dtos/UserDataDto"
 import QueuedMediaDto from "../../dtos/QueuedMediaDto"
 import useApiMutation from "../../hooks/useApiMutation"
 import SavedMediaDto from "../../dtos/SavedMediaDto"
 import moment from "moment"
+import Message from "../../types/Message"
 
 const defaultRoomState: RoomStateDto = {
     roomId: "",
@@ -102,6 +104,8 @@ const Room = () => {
         })
     }
 
+    const [messages, setMessages] = useState<Message[]>([])
+
     useEffect(() => {
         on("ROOM_STATE_UPDATED", (data: EventFromServer) => {
             const event = data as EventFromServer_RoomStateUpdated
@@ -138,12 +142,25 @@ const Room = () => {
                 currentlyPlayingMediaStartedAt: event.data.timeStarted
             }))
         })
+        on("USER_SENT_MESSAGE", (data: EventFromServer) => {
+            const event = data as EventFromServer_UserSentMessage
+
+            setMessages(existingMessages => [
+                {
+                    id: (existingMessages[0]?.id ?? 0) + 1,
+                    username: event.data.username,
+                    message: event.data.message,
+                    timestamp: event.data.timestamp
+                },
+                ...existingMessages
+            ])
+        })
     }, [mediaQueue, on, queueMediaRequest])
 
     const getRoomPanel = () => {
         switch (selectedRoomPanel) {
             case "chat":
-                return <ChatPanel username={userStateRequest.data?.displayName ?? ""} />
+                return <ChatPanel username={userStateRequest.data?.displayName ?? ""} messages={messages} />
             case "queue":
                 return (
                     <QueuePanel

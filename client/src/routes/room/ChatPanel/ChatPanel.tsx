@@ -3,34 +3,17 @@ import Input from "../../../library/Input"
 import Button from "../../../library/Button"
 import Chat from "./Chat"
 import { useWebSocket } from "../../../contexts/WebSocketContext"
-import { EventFromServer, EventFromServer_UserSentMessage } from "../../../contexts/EventFromServer"
 import Message from "../../../types/Message"
 
 type ChatPanelProps = {
     username: string
+    messages: Message[]
 }
 
-const ChatPanel = ({ username }: ChatPanelProps) => {
-    const { on, send } = useWebSocket()
+const ChatPanel = ({ username, messages }: ChatPanelProps) => {
+    const { send } = useWebSocket()
 
-    const [messages, setMessages] = useState<Message[]>([])
     const [messageInputValue, setMessageInputValue] = useState("")
-
-    useEffect(() => {
-        on("USER_SENT_MESSAGE", (data: EventFromServer) => {
-            const event = data as EventFromServer_UserSentMessage
-
-            setMessages(existingMessages => [
-                {
-                    id: (existingMessages[0]?.id ?? 0) + 1,
-                    username: event.data.username,
-                    message: event.data.message,
-                    timestamp: event.data.timestamp
-                },
-                ...existingMessages
-            ])
-        })
-    }, [on])
 
     const onSendMessage = () => {
         if (messageInputValue === "") return
