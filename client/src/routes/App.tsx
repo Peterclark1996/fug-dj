@@ -5,7 +5,7 @@ import { ClerkProvider, RedirectToSignIn, SignIn, SignUp, SignedIn, SignedOut } 
 import Home from "./home/Home"
 import CreateUserForm from "./createUser/CreateUserForm"
 
-const clerkPubKey = import.meta.env.VITE_REACT_APP_CLERK_PUBLISHABLE_KEY
+const clerkPubKey = "pk_test_d2VsY29tZS1hcmFjaG5pZC0zMS5jbGVyay5hY2NvdW50cy5kZXYk"
 
 const App = () => {
     return (
