@@ -186,7 +186,7 @@ const Room = () => {
     const getMainContentPanel = () => {
         switch (selectedMainContentPanel) {
             case "stage":
-                return <Stage currentlyPlayingMedia={roomState.currentlyPlayingMedia} />
+                return <></>
             case "library":
                 return (
                     <MediaLibrary
@@ -224,7 +224,14 @@ const Room = () => {
                                 currentlyPlayingStartTime={roomState.currentlyPlayingMediaStartedAt}
                             />
                         </div>
-                        <div className="flex grow bg-slate-700 z-0">{getMainContentPanel()}</div>
+                        <div className="flex relative grow bg-slate-700 z-0">
+                            <Stage currentlyPlayingMedia={roomState.currentlyPlayingMedia} />
+                            {selectedMainContentPanel !== "stage" && (
+                                <div className="flex grow absolute bg-slate-700 inset-0 z-10">
+                                    {getMainContentPanel()}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="flex flex-col max-w-xs w-80">
                         <div className="flex h-12 bg-slate-500 form-emboss z-20">
