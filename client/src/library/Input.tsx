@@ -5,11 +5,12 @@ type InputProps = {
     className?: string
     placeholder?: string
     invalidMessage?: string
+    stretch?: boolean
     value: string
     onChange: (value: string) => void
 }
 
-const Input = ({ className = "", placeholder = "", invalidMessage, value, onChange }: InputProps) => {
+const Input = ({ className = "", placeholder = "", invalidMessage, stretch = false, value, onChange }: InputProps) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,9 +27,9 @@ const Input = ({ className = "", placeholder = "", invalidMessage, value, onChan
     return (
         <div className={`${className} rounded ${invalidMessage ? classes.invalid : ""}`}>
             <input
-                ref={inputRef}
+                ref={stretch ? undefined : inputRef}
                 placeholder={placeholder}
-                className={`rounded border-0 px-2 outline-none h-9 text-slate-800 form-deboss`}
+                className="w-full rounded border-0 px-2 outline-none h-9 text-slate-800 form-deboss"
                 value={value}
                 onChange={onInputChange}
             />

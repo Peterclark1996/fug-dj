@@ -12,6 +12,14 @@ data class OutboundUserSentMessage(
 
 @Serializable
 data class UserSentMessage(
+    val source: SourceType,
+    val userId: String?,
     val username: String,
-    val message: String
+    val message: String,
+    val timestamp: String
 )
+
+enum class SourceType {
+    USER,
+    SYSTEM
+}

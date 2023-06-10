@@ -50,7 +50,7 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>, mong
                 return@webSocket
             }
 
-            val thisConnection = Connection(this, name)
+            val thisConnection = Connection(this, roomId, userId, name)
 
             serverState.get().connections += thisConnection
 
@@ -87,7 +87,9 @@ fun Application.configureSockets(serverState: AtomicReference<ServerState>, mong
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
                     parseStringToEvent(receivedText).flatMap(::deserializeEventData).map {
-                        it.onReceive(thisConnection, serverState.get())
+                        it.onReceive(thisConnection, serverState)
+                    }.tapLeft {
+                        println(it)
                     }
                 }
             } catch (e: Exception) {

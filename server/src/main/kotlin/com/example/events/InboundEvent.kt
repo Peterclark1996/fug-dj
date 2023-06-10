@@ -6,10 +6,10 @@ import com.example.func.parse
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InboundEvent(val type: InboundEventType, val jsonData: String)
+data class InboundEvent(val type: InboundEventType, val data: String)
 
 fun deserializeEventData(event: InboundEvent): Either<Error, IInboundEvent> =
     when (event.type) {
-        InboundEventType.USER_SENT_MESSAGE -> InboundUserSentMessage.serializer().parse(event.jsonData, true)
+        InboundEventType.USER_SENT_MESSAGE -> InboundUserSentMessage.serializer().parse(event.data, true)
     }
 

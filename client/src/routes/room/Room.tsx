@@ -5,7 +5,7 @@ import Loading from "../../library/Loading"
 import HeadInfo from "./HeadInfo"
 import HeadLogo from "./HeadLogo"
 import RoomControl from "./RoomControl"
-import ChatPanel from "./ChatPanel"
+import ChatPanel from "./ChatPanel/ChatPanel"
 import { useEffect, useState } from "react"
 import RoomPanel from "../../types/RoomPanel"
 import QueuePanel from "./QueuePanel/QueuePanel"
@@ -140,7 +140,7 @@ const Room = () => {
     const getRoomPanel = () => {
         switch (selectedRoomPanel) {
             case "chat":
-                return <ChatPanel />
+                return <ChatPanel username={userStateRequest.data?.displayName ?? ""} />
             case "queue":
                 return (
                     <QueuePanel

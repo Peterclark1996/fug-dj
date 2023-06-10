@@ -40,10 +40,15 @@ const MediaLibrary = ({ onClose, addMediaToQueue }: MediaLibraryProps) => {
                 <>
                     <div className="flex items-center mb-2 p-2 rounded bg-slate-600 form-emboss outline outline-1 outline-slate-800">
                         <span className="text-3xl">Media Library</span>
-                        <Input className="ms-2" placeholder="Quick Search" value={search} onChange={setSearch} />
                         <Input
                             className="ms-2"
-                            placeholder="Add Video From URL"
+                            placeholder="🔍 Search for video..."
+                            value={search}
+                            onChange={setSearch}
+                        />
+                        <Input
+                            className="ms-4"
+                            placeholder="Add video url..."
                             value={mediaToAdd}
                             onChange={setMediaToAdd}
                         />

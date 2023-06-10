@@ -31,8 +31,11 @@ export type EventFromServer_NextMediaStarted = {
 export type EventFromServer_UserSentMessage = {
     type: "USER_SENT_MESSAGE"
     data: {
+        source: "USER" | "SYSTEM"
+        userId: string | undefined
         username: string
         message: string
+        timestamp: string
     }
 }
 
