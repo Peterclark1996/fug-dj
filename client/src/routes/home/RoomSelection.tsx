@@ -21,7 +21,7 @@ const RoomSelection = () => {
                         key={room.roomId}
                         className="mb-2 mx-auto"
                         colour="bg-green-400"
-                        text={`Join: ${room.displayName}`}
+                        text={`Join: ${room.displayName} (${room.connectedUsers.length})`}
                         onClick={() => navigate(`/room/${room.roomId}`)}
                     />
                 ))}

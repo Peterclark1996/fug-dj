@@ -3,8 +3,11 @@ import { useCallback, useEffect, useState } from "react"
 import ApiState from "./ApiState"
 import { getApiUrl } from "./constants"
 import { useAuth } from "@clerk/clerk-react"
+import useIsMounted from "./useIsMounted"
 
 const useApiQuery = <T>(url: string, canRunImmediately = true) => {
+    const isMounted = useIsMounted()
+
     const sanitisiedUrl = url.startsWith("/") ? url : "/" + url
 
     const [lastFetchedUrl, setLastFetchedUrl] = useState<string>()
@@ -48,6 +51,9 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
                 },
                 validateStatus: () => true
             })
+
+            if (!isMounted.current) return
+
             setState({
                 errored: false,
                 loading: false,
@@ -65,7 +71,7 @@ const useApiQuery = <T>(url: string, canRunImmediately = true) => {
                 loaded: true
             })
         }
-    }, [getToken, sanitisiedUrl])
+    }, [getToken, isMounted, sanitisiedUrl])
 
     useEffect(() => {
         if (lastFetchedUrl === sanitisiedUrl && (state.errored || state.loading || state.loaded)) return
