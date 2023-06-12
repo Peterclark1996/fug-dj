@@ -28,8 +28,13 @@ fun Application.configureRouting(
 ) {
     routing {
         static("assets") {
-            staticRootFolder = File("client/assets")
-            files(".")
+            resources("client/assets")
+        }
+
+        static("/") {
+            default("index.html")
+            staticRootFolder = File("client")
+            file("index.html")
         }
 
         authenticate("jwt") {
