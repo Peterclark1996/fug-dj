@@ -16,7 +16,6 @@ import com.example.state.ServerState
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.http.content.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.io.File
 import java.util.concurrent.atomic.AtomicReference
@@ -27,14 +26,15 @@ fun Application.configureRouting(
     youtubeFunctions: YoutubeFunctions
 ) {
     routing {
-        static("assets") {
-            resources("client/assets")
-        }
-
         static("/") {
-            default("index.html")
             staticRootFolder = File("client")
+
             file("index.html")
+            default("index.html")
+
+            static("assets") {
+                files(".")
+            }
         }
 
         authenticate("jwt") {
@@ -55,18 +55,6 @@ fun Application.configureRouting(
                     getAuthenticatedUser(mongoFunctions)
                     putAuthenticatedUser(mongoFunctions)
                 }
-            }
-        }
-
-        route("/") {
-            handle {
-                call.respondFile(File("client/index.html"))
-            }
-        }
-
-        route("/{...}") {
-            handle {
-                call.respondFile(File("client/index.html"))
             }
         }
     }
