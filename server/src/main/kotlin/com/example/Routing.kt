@@ -27,6 +27,10 @@ fun Application.configureRouting(
     youtubeFunctions: YoutubeFunctions
 ) {
     routing {
+        static("assets") {
+            files("client/assets")
+        }
+
         authenticate("jwt") {
             route("/api") {
                 route("/playlist") {
@@ -48,11 +52,13 @@ fun Application.configureRouting(
             }
         }
 
-        static("assets") {
-            files("client/assets")
+        route("/") {
+            handle {
+                call.respondFile(File("client/index.html"))
+            }
         }
 
-        route("{...}") {
+        route("/{...}") {
             handle {
                 call.respondFile(File("client/index.html"))
             }
