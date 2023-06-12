@@ -26,7 +26,7 @@ fun Application.configureRouting(
     youtubeFunctions: YoutubeFunctions
 ) {
     routing {
-        static("/") {
+        static("/*") {
             staticRootFolder = File("client")
 
             file("index.html")
