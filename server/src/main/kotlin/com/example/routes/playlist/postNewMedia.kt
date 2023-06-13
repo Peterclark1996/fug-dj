@@ -41,7 +41,7 @@ fun Route.postNewMedia(mongoFunctions: MongoFunctions, youtubeFunctions: Youtube
                                         SavedMediaDto(
                                             mediaId,
                                             videoInfo.snippet.title,
-                                            videoInfo.snippet.thumbnails.default.url,
+                                            videoInfo.snippet.thumbnails.standard.url,
                                             mediaDuration
                                         )
                                     )

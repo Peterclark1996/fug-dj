@@ -22,7 +22,11 @@ const MediaLibrary = ({ onClose, addMediaToQueue }: MediaLibraryProps) => {
     const userPlaylistsRequest = useApiQuery<PlaylistDto[]>(`playlist`)
     const playlists = userPlaylistsRequest.data ?? []
 
-    const onAddClick = () => addNewMediaRequest.execute({ url: mediaToAdd }).then(userPlaylistsRequest.execute)
+    const onAddClick = () =>
+        addNewMediaRequest.execute({ url: mediaToAdd }).then(() => {
+            setMediaToAdd("")
+            userPlaylistsRequest.execute()
+        })
 
     const playlistsToShow =
         search === ""

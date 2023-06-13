@@ -22,7 +22,7 @@ data class YoutubeVideoSnippet(
 
 @Serializable
 data class YoutubeVideoThumbnails(
-    val default: YoutubeVideoThumbnail,
+    val standard: YoutubeVideoThumbnail,
 )
 
 @Serializable
