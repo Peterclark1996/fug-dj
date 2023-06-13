@@ -225,7 +225,10 @@ const Room = () => {
                             />
                         </div>
                         <div className="flex relative grow bg-slate-700 z-0">
-                            <Stage currentlyPlayingMedia={roomState.currentlyPlayingMedia} />
+                            <Stage
+                                currentlyPlayingMedia={roomState.currentlyPlayingMedia}
+                                currentlyPlayingStartTime={roomState.currentlyPlayingMediaStartedAt}
+                            />
                             {selectedMainContentPanel !== "stage" && (
                                 <div className="flex grow absolute bg-slate-700 inset-0 z-10">
                                     {getMainContentPanel()}
